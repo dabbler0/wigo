@@ -1,3 +1,4 @@
+fs = require 'fs'
 brain = require 'brain'
 
 ###
@@ -183,15 +184,33 @@ game2048 = new Game {
 class Agent
   constructor: (@game, @network) ->
 
+  getBest: (state, actions) ->
+    max = -Infinity; best = null
+    for action in actions
+      newState = @game.advance state, action
+      score = @network.run _toArr newState.state
+      console.log action, score
+      if score > max and not _eq newState.state, state
+        max = score
+        best = action
+    return best
+
 Agent.fromData = (game, data) ->
   network = new brain.NeuralNetwork hiddenLayers: [game.inputs * 3]
-  network.train data, {log: true, logPeriod: 1, learningRate: 0.1}
+  network.train data, {log: true, logPeriod: 1, learningRate: 0.3}
+
+  return new Agent game, network
+
+Agent.fromJSON = (game, data) ->
+  network = new brain.NeuralNetwork hiddenLayers: [game.inputs * 3]
+  network.fromJSON data
+  return new Agent game, network
 
 games = (game2048.playRandom(false) for [1..1000])
 
 data = []
 
-_toArr = (floats) -> (_log2(x) / 10 for x, i in floats)
+_toArr = (floats) -> ((x * x / (2048 * 2048)) for x, i in floats)
 
 _sigmoid = (x) ->
     return 1.0 / (1.0 + Math.E ^ (-x))
@@ -203,4 +222,29 @@ for game in games
       output: [_sigmoid(game.score)]
     }
 
-Agent.fromData game2048, data
+console.log 'training...'
+agent = Agent.fromData game2048, data
+#agent = Agent.fromJSON game2048, JSON.parse fs.readFileSync('agent.json').toString()
+
+fs.writeFileSync 'agent.json', JSON.stringify agent.network.toJSON()
+
+#console.log 'trained and wrote.'
+console.log 'loaded'
+
+state = new Float64Array 16
+legal = [0...4]
+game2048.init state
+step = =>
+  move = agent.getBest state, legal
+  results = game2048.advance state, move
+
+  state = results.state
+  legal = results.actions
+
+  console.log game2048.render state
+
+  if results.over
+    console.log results.score
+  else
+    setTimeout step, 60
+step()
