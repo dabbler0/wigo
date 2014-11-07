@@ -30,6 +30,12 @@ _rand = (a, b) ->
   else
     return Math.floor Math.random() * a
 
+# Log base 2 utility function
+_log2 = (x) ->
+  if x is 0
+    return 0
+  return Math.log(x) / Math.log(2)
+
 class Game
   constructor: ({inputs: @inputs, outputs: @outputs, advance: @_advance, render: @render, init: @init}) ->
 
@@ -147,7 +153,7 @@ game2048 = new Game {
     if won or lost
       score = 0
       for square in state
-        score += square * (Math.log(square) / Math.log(2))
+        score += square * _log2(square)
       return {
         over: true
         score: score
@@ -181,17 +187,20 @@ Agent.fromData = (game, data) ->
   network = new brain.NeuralNetwork hiddenLayers: [game.inputs * 3]
   network.train data, {log: true, logPeriod: 1, learningRate: 0.1}
 
-games = (game2048.playRandom(false) for [1..100])
+games = (game2048.playRandom(false) for [1..1000])
 
 data = []
 
-_toArr = (floats) -> (x for x, i in floats)
+_toArr = (floats) -> (_log2(x) / 10 for x, i in floats)
+
+_sigmoid = (x) ->
+    return 1.0 / (1.0 + Math.E ^ (-x))
 
 for game in games
   for state in game.history
     data.push map = {
       input: _toArr state
-      output: [game.score]
+      output: [_sigmoid(game.score)]
     }
 
 Agent.fromData game2048, data
