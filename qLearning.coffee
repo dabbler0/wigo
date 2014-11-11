@@ -16,7 +16,10 @@ exports.QLearner = class QLearner
   # for given state and action
   estimate: (state, action) ->
     q = 0
-    q += @thetas[action][i] * basis(state) for basis, i in @bases
+    for basis, i in @bases
+      console.log basis(state), @thetas[action][i], q
+      q += @thetas[action][i] * basis(state)
+    console.log q
     return q
 
   # Forward: get best action and associated predicted reward
@@ -25,7 +28,7 @@ exports.QLearner = class QLearner
     best = null; max = -Infinity
     for action in @actions
       estimate = @estimate state, action
-      console.log action, estimate
+      console.log 'estimate', estimate
       if estimate > max
         max = estimate; best = [action]
       else if estimate is max
@@ -47,9 +50,10 @@ exports.QLearner = class QLearner
   # from given action/reward pair.
   learn: (state, action, newState, reward) ->
     thetas = []
-    temporalDifference = reward + @discount * @forward(newState).estimate - @estimate(state, action)
+    console.log @thetas[action]
+    error = reward + 0 * @discount * @forward(newState).estimate - @estimate(state, action)
     for t, i in @thetas[action]
-      thetas.push t +  @rate * @bases[i](state) * temporalDifference
+      thetas.push t + @rate * @bases[i](state) * (error - t)
     @thetas[action] = thetas
 
 # ## LinearQLearner
@@ -60,8 +64,23 @@ exports.LinearQLearner = class LinearQLearner extends QLearner
     bases = []
     for i in [0...@stateSize] then do (i) =>
       bases.push (state) -> state[i]
-      for j in [0...@stateSize] then do (j) =>
+      for j in [0...@stateSize] when j >= i then do (j) =>
         bases.push (state) -> state[i] * state[j]
 
     # Inherit
     super @stateSize, @actions, @rate, @discount, bases
+
+exports.PolynomialQLearner = class PolynomialQLearner extends QLearner
+  _getBasisFunctions = (n, p) ->
+    if n is 0
+      return [(x) -> 1]
+    else
+      bases = _getBasisFunctions n - 1, p
+      newBases = []
+      for power in [0..p] then do (power) ->
+        for base in bases then do (base) ->
+          newBases.push (x) -> Math.pow(x[n - 1], power) * base(x)
+      return newBases
+
+  constructor: (@stateSize, @actions, @rate, @discount, @degree) ->
+    super @stateSize, @actions, @rate, @discount, _getBasisFunctions @stateSize, @degree

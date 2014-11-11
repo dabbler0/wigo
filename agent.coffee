@@ -301,26 +301,46 @@ gameDumb = new Game {
   render: (state) -> state[0].toPrecision(2) + '|' + state[1].toPrecision(2)
 }
 
+gameNot = new Game {
+  inputs: 2
+  outputs: 1
+  advance: (state, action) ->
+    reward = if state[0] > state[1] then 1 else 0
+    state[0] = Math.random()
+    state[1] = Math.random()
+    return {
+      state: state
+      reward: reward
+    }
+
+  init: (state) -> state[0] = Math.random(); state[1] = Math.random()
+  render: (state) -> state[0].toString() + '|' + state[1].toString()
+}
+
 class Agent
   constructor: (@game) ->
-    @qLearner = new qLearning.LinearQLearner @game.inputs, [0...@game.outputs], 1, 0
+    @qLearner = new qLearning.PolynomialQLearner @game.inputs, [0...@game.outputs], 0.1, 0, 2
+    #@qLearner = new qLearning.LinearQLearner @game.inputs, [0...@game.outputs], 0.1, 0, 1
 
   step: (state) ->
     {action, estimate} = @qLearner.forward state
+    console.log estimate
     {state: newState, reward} = obj = @game.advance state, action
     obj.action = action
     obj.reward = reward
     @qLearner.learn state, action, newState, reward
     return obj
 
-agent = new Agent gameDumb
-state = new Float64Array 2
-gameDumb.init state
+game = gameDumb
+
+agent = new Agent game
+state = new Float64Array game.inputs
+game.init state
 score = 0
 go = ->
   {state, done, action, reward} = agent.step state
   score += reward
   console.log score
-  console.log gameDumb.render state
+  console.log game.render state
   setTimeout go, 1000 / 60
 go()
