@@ -1,5 +1,6 @@
 fs = require 'fs'
 brain = require 'brain'
+qLearning = require './qLearning'
 
 ###
 EXAMPLE GAME: 2048
@@ -105,6 +106,7 @@ game2048 = new Game {
 
   advance: (state, action) ->
     old = _copy state
+    merged = false
 
     # Perform the swipe action
     queues = QUEUES_2048[action]
@@ -117,6 +119,7 @@ game2048 = new Game {
         j++ until state[queue[j]] isnt 0
 
         if j < 4 and state[queue[j]] is val
+          merged = true
           state[queue[j]] *= 2
         else
           state[queue[j - 1]] = val
@@ -152,20 +155,20 @@ game2048 = new Game {
 
     # If the game is over, compute score
     if won or lost
-      score = 0
-      for square in state
-        score += square * _log2(square)
       return {
         over: true
-        score: score
+        reward: -100
         state: state
         actions: []
       }
 
     # Otherwise, return the new state
+    score = 0
+    for square in state
+      score += _log2(square) ** 2
     return {
       over: false
-      score: null
+      reward: if merged then 1 else -1
       state: state
       actions: [0, 1, 2, 3]
     }
@@ -181,70 +184,143 @@ game2048 = new Game {
     return str
 }
 
-class Agent
-  constructor: (@game, @network) ->
+_getCoord = (n) -> {
+  x: n % 5
+  y: (n - (n % 5)) / 5
+}
 
-  getBest: (state, actions) ->
-    max = -Infinity; best = null
-    for action in actions
-      newState = @game.advance state, action
-      score = @network.run _toArr newState.state
-      console.log action, score
-      if score > max and not _eq newState.state, state
-        max = score
-        best = action
-    return best
+_toIndex = (coord) -> coord.x + coord.y * 5
 
-Agent.fromData = (game, data) ->
-  network = new brain.NeuralNetwork hiddenLayers: [game.inputs * 3]
-  network.train data, {log: true, logPeriod: 1, learningRate: 0.3}
+gameGrid = new Game {
+  inputs: 25
+  outputs: 4
 
-  return new Agent game, network
+  init: (state) ->
+    for val, i in state
+      if Math.random() < 3 / 25
+        state[i] = -1
+    state[0] = 2
+    return state
 
-Agent.fromJSON = (game, data) ->
-  network = new brain.NeuralNetwork hiddenLayers: [game.inputs * 3]
-  network.fromJSON data
-  return new Agent game, network
+  render: (state) ->
+    str = ''
+    for el, i in state
+      if el is 1
+        str += '*'
+      else if el is -1
+        str += '#'
+      else if el is 2
+        str += '@'
+      else
+        str += ' '
+      if i % 5 is 0
+        str += '\n'
+    return str
 
-games = (game2048.playRandom(false) for [1..1000])
+  advance: (state, action) ->
+    state = _copy state
+    oldState = _copy state
+    playerCoord = null
+    for val, i in state
+      if val is 2
+        playerCoord = _getCoord i
+        state[i] = 0
+        break
 
-data = []
+    switch action
+      when 0
+        if playerCoord.x > 0
+          playerCoord.x -=1
+        else
+          state[_toIndex playerCoord] = 2
+          return {
+            state: state
+            reward: -1
+          }
+      when 1
+        if playerCoord.y > 0
+          playerCoord.y -=1
+        else
+          state[_toIndex playerCoord] = 2
+          return {
+            state: state
+            reward: -1
+          }
+      when 2
+        if playerCoord.x < 4
+          playerCoord.x +=1
+        else
+          state[_toIndex playerCoord] = 2
+          return {
+            state: state
+            reward: -1
+          }
+      when 3
+        if playerCoord.y < 4
+          playerCoord.y +=1
+        else
+          state[_toIndex playerCoord] = 2
+          return {
+            state: state
+            reward: -1
+          }
 
-_toArr = (floats) -> ((x * x / (2048 * 2048)) for x, i in floats)
+    if state[_toIndex playerCoord] is -1
+      return {
+        state: oldState
+        reward: 1
+      }
+    else
+      state[_toIndex playerCoord] = 2
+      return {
+        state: state
+        reward: 0
+    }
+}
 
-_sigmoid = (x) ->
-    return 1.0 / (1.0 + Math.E ^ (-x))
-
-for game in games
-  for state in game.history
-    data.push map = {
-      input: _toArr state
-      output: [_sigmoid(game.score)]
+gameDumb = new Game {
+  inputs: 2
+  outputs: 2
+  advance: (state, action) ->
+    state = _copy state
+    if (state[0] > state[1]) is (action is 0)
+      reward = 1
+    else
+      reward = -1
+    state[0] = Math.random() * 10
+    state[1] = Math.random() * 10
+    return {
+      state: state
+      reward: reward
     }
 
-console.log 'training...'
-agent = Agent.fromData game2048, data
-#agent = Agent.fromJSON game2048, JSON.parse fs.readFileSync('agent.json').toString()
+  init: (state) ->
+    state[0] = Math.random() * 10
+    state[1] = Math.random() * 10
 
-fs.writeFileSync 'agent.json', JSON.stringify agent.network.toJSON()
+  render: (state) -> state[0].toPrecision(2) + '|' + state[1].toPrecision(2)
+}
 
-#console.log 'trained and wrote.'
-console.log 'loaded'
+class Agent
+  constructor: (@game) ->
+    @qLearner = new qLearning.LinearQLearner @game.inputs, [0...@game.outputs], 1, 0
 
-state = new Float64Array 16
-legal = [0...4]
-game2048.init state
-step = =>
-  move = agent.getBest state, legal
-  results = game2048.advance state, move
+  step: (state) ->
+    {action, estimate} = @qLearner.forward state
+    {state: newState, reward} = obj = @game.advance state, action
+    obj.action = action
+    obj.reward = reward
+    @qLearner.learn state, action, newState, reward
+    return obj
 
-  state = results.state
-  legal = results.actions
-
-  console.log game2048.render state
-
-  if results.over
-    console.log results.score
-  else
-    setTimeout step, 60
-step()
+agent = new Agent gameDumb
+state = new Float64Array 2
+gameDumb.init state
+score = 0
+go = ->
+  {state, done, action, reward} = agent.step state
+  score += reward
+  console.log score
+  console.log gameDumb.render state
+  setTimeout go, 1000 / 60
+go()
