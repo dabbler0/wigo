@@ -197,20 +197,22 @@ gameGrid = new Game {
 
   init: (state) ->
     for val, i in state
-      if Math.random() < 3 / 25
+      if Math.random() < 7 / 25
         state[i] = -1
-    state[0] = 2
+      if Math.random() < 7 / 25
+        state[i] = 2
+    state[0] = 1
     return state
 
   render: (state) ->
     str = ''
     for el, i in state
-      if el is 1
-        str += '*'
-      else if el is -1
+      if el is -1
         str += '#'
-      else if el is 2
+      else if el is 1
         str += '@'
+      else if el is 2
+        str += '$'
       else
         str += ' '
       if i % 5 is 0
@@ -222,59 +224,45 @@ gameGrid = new Game {
     oldState = _copy state
     playerCoord = null
     for val, i in state
-      if val is 2
+      if val is 1
         playerCoord = _getCoord i
         state[i] = 0
         break
 
     switch action
-      when 0
-        if playerCoord.x > 0
-          playerCoord.x -=1
-        else
-          state[_toIndex playerCoord] = 2
-          return {
-            state: state
-            reward: -1
-          }
-      when 1
-        if playerCoord.y > 0
-          playerCoord.y -=1
-        else
-          state[_toIndex playerCoord] = 2
-          return {
-            state: state
-            reward: -1
-          }
-      when 2
-        if playerCoord.x < 4
-          playerCoord.x +=1
-        else
-          state[_toIndex playerCoord] = 2
-          return {
-            state: state
-            reward: -1
-          }
-      when 3
-        if playerCoord.y < 4
-          playerCoord.y +=1
-        else
-          state[_toIndex playerCoord] = 2
-          return {
-            state: state
-            reward: -1
-          }
+      when 0 then playerCoord.x -= 1
+      when 1 then playerCoord.y -= 1
+      when 2 then playerCoord.x += 1
+      when 3 then playerCoord.y += 1
 
-    if state[_toIndex playerCoord] is -1
+    reward = 0
+
+    unless 0 <= playerCoord.x < 5 and 0 <= playerCoord.y < 5
       return {
         state: oldState
-        reward: 1
+        reward: -1
       }
-    else
-      state[_toIndex playerCoord] = 2
-      return {
-        state: state
-        reward: 0
+    switch state[_toIndex playerCoord]
+      when -1
+        return {
+          state: oldState
+          reward: -1
+        }
+      when 2
+        reward = 10
+    if Math.random() < 0.1
+      state[0] = 2
+    if Math.random() < 0.1
+      state[_toIndex {x: 4, y: 0}] = 2
+    if Math.random() < 0.1
+      state[_toIndex {x: 0, y: 4}] = 2
+    if Math.random() < 0.1
+      state[_toIndex {x: 4, y: 4}] = 2
+
+    state[_toIndex playerCoord] = 1
+    return {
+      state: state
+      reward: reward
     }
 }
 
@@ -287,16 +275,16 @@ gameDumb = new Game {
       reward = 1
     else
       reward = -1
-    state[0] = Math.random() * 10
-    state[1] = Math.random() * 10
+    state[0] = Math.random()
+    state[1] = Math.random()
     return {
       state: state
       reward: reward
     }
 
   init: (state) ->
-    state[0] = Math.random() * 10
-    state[1] = Math.random() * 10
+    state[0] = Math.random()
+    state[1] = Math.random()
 
   render: (state) -> state[0].toPrecision(2) + '|' + state[1].toPrecision(2)
 }
@@ -319,28 +307,33 @@ gameNot = new Game {
 
 class Agent
   constructor: (@game) ->
-    @qLearner = new qLearning.PolynomialQLearner @game.inputs, [0...@game.outputs], 0.1, 0, 2
+    @qLearner = new qLearning.LinearQLearner @game.inputs, [0...@game.outputs], 0.001, 0.1
     #@qLearner = new qLearning.LinearQLearner @game.inputs, [0...@game.outputs], 0.1, 0, 1
 
   step: (state) ->
     {action, estimate} = @qLearner.forward state
-    console.log estimate
     {state: newState, reward} = obj = @game.advance state, action
     obj.action = action
     obj.reward = reward
     @qLearner.learn state, action, newState, reward
     return obj
 
-game = gameDumb
+game = gameGrid
 
 agent = new Agent game
 state = new Float64Array game.inputs
 game.init state
+randomState = _copy state
+randomScore = 0
 score = 0
 go = ->
   {state, done, action, reward} = agent.step state
+  {state: randomState, reward: randomReward} = game.advance randomState, _rand [0...game.outputs]
+  randomScore += randomReward
   score += reward
   console.log score
   console.log game.render state
+  console.log randomScore
+  console.log game.render randomState
   setTimeout go, 1000 / 60
 go()
