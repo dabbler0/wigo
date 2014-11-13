@@ -1,4 +1,11 @@
+###
+WIGO Game definition schema
+Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
+MIT License.
+###
+
 # # State
+# Generic representation of a game state.
 exports.State = class State
   constructor: (@size, nLayers = 1) ->
     @layers = (new Uint8Array(@size) for [0...nLayers])
@@ -57,6 +64,7 @@ exports.State = class State
         return 0
 
 # # Game
+# A single game, including a persistent state.
 exports.Game = class Game
   constructor: (@size, @actions, @nLayers = 1, @players = 1) ->
     @state = new State @size, @nLayers
@@ -69,27 +77,3 @@ exports.Game = class Game
   # Return a logging string graphically representing the string.
   render: -> ''
 
-
-_randomBit = -> if Math.random() < 0.5 then 1 else 0
-
-class DumbGame extends Game
-  constructor: ->
-    super 2, 2
-    @state.layers[0][0] = 1
-    @state.layers[0][1] = 0
-
-  advance: (action) ->
-    if (@state.layers[0][0] > @state.layers[0][1]) is (action is 0)
-      reward = 1
-    else
-      reward = -1
-    @state.layers[0][0] = _randomBit()
-    @state.layers[0][1] = 1 - @state.layers[0][0]
-    return reward
-
-  render: -> "#{@state.layers[0][0]},#{@state.layers[0][1]}"
-
-a = new DumbGame()
-for [1..100]
-  console.log a.render()
-  console.log a.advance Math.round(Math.random())
