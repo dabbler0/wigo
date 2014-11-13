@@ -1,5 +1,5 @@
 ###
-WIGO Stochastic Regularized Gradient Descent implementation
+WIGO stochastic regularized gradient descent linear regression implementation
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
 ###

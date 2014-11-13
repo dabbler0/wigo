@@ -7,12 +7,5 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "brain": "^0.7.0",
-    "gl-matrix": "^2.1.0",
-    "keypress": "^0.2.1",
-    "numeric": "^1.2.6",
-    "sylvester": "0.0.21"
-  }
+  "license": "ISC"
 }

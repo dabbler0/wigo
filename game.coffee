@@ -1,5 +1,5 @@
 ###
-WIGO Game definition schema
+WIGO game definition schema
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
 ###
