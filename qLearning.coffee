@@ -11,9 +11,8 @@ helper = require './helper'
 # Linear combination regresssion Q-learning agent
 exports.QLearner = class QLearner
   constructor: (@stateSize, @actions, @rate = 0.5, @discount = 0.5, @epsilon = 0.1, @bases = []) ->
-    @epsilon = 0.1
     # Add a bias term
-    #@bases.unshift (-> 1)
+    @bases.unshift (-> 1)
 
     # Init thetas to zero
     @regressors = (new Regressor(@bases, @rate) for [0...@actions])
