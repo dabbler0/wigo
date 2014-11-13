@@ -199,14 +199,16 @@ gameGrid = new Game {
     for val, i in state
       if Math.random() < 7 / 25
         state[i] = -1
-      if Math.random() < 7 / 25
-        state[i] = 2
+      #if Math.random() < 7 / 25
+      #  state[i] = 2
     state[0] = 1
     return state
 
   render: (state) ->
     str = ''
     for el, i in state
+      if i % 5 is 0
+        str += '\n'
       if el is -1
         str += '#'
       else if el is 1
@@ -215,25 +217,35 @@ gameGrid = new Game {
         str += '$'
       else
         str += ' '
-      if i % 5 is 0
-        str += '\n'
     return str
 
   advance: (state, action) ->
     state = _copy state
     oldState = _copy state
     playerCoord = null
+
+    for val, i in state when val isnt 1
+      if Math.random() < 0.05
+        if val is 0
+          oldState[i] = -1
+        if val is -1
+          oldState[i] = 0
+
     for val, i in state
       if val is 1
         playerCoord = _getCoord i
         state[i] = 0
         break
 
+    #console.log playerCoord, action
+
     switch action
       when 0 then playerCoord.x -= 1
       when 1 then playerCoord.y -= 1
       when 2 then playerCoord.x += 1
       when 3 then playerCoord.y += 1
+
+    #console.log playerCoord
 
     reward = 0
 
@@ -250,6 +262,7 @@ gameGrid = new Game {
         }
       when 2
         reward = 10
+    ###
     if Math.random() < 0.1
       state[0] = 2
     if Math.random() < 0.1
@@ -258,6 +271,14 @@ gameGrid = new Game {
       state[_toIndex {x: 0, y: 4}] = 2
     if Math.random() < 0.1
       state[_toIndex {x: 4, y: 4}] = 2
+    ###
+
+    for val, i in state when val isnt 1
+      if Math.random() < 0.001
+        if val is 0
+          state[i] = -1
+        if val is -1
+          state[i] = 0
 
     state[_toIndex playerCoord] = 1
     return {
@@ -307,7 +328,7 @@ gameNot = new Game {
 
 class Agent
   constructor: (@game) ->
-    @qLearner = new qLearning.LinearQLearner @game.inputs, [0...@game.outputs], 0.001, 0.1
+    @qLearner = new qLearning.LinearQLearner @game.inputs, [0...@game.outputs], 0.01, 0.1, 0.1
     #@qLearner = new qLearning.LinearQLearner @game.inputs, [0...@game.outputs], 0.1, 0, 1
 
   step: (state) ->
@@ -315,6 +336,8 @@ class Agent
     {state: newState, reward} = obj = @game.advance state, action
     obj.action = action
     obj.reward = reward
+    if state[0] is 1 and action in [2, 3]
+      console.log 'ACTION', action, 'REWARD', reward
     @qLearner.learn state, action, newState, reward
     return obj
 
@@ -322,11 +345,17 @@ game = gameGrid
 
 agent = new Agent game
 state = new Float64Array game.inputs
+exampleState = new Float64Array 25
+exampleState[0] = 2
 game.init state
 randomState = _copy state
 randomScore = 0
 score = 0
 go = ->
+  console.log agent.qLearner.regressors[0].estimate exampleState
+  console.log agent.qLearner.regressors[1].estimate exampleState
+  console.log agent.qLearner.regressors[2].estimate exampleState
+  console.log agent.qLearner.regressors[3].estimate exampleState
   {state, done, action, reward} = agent.step state
   {state: randomState, reward: randomReward} = game.advance randomState, _rand [0...game.outputs]
   randomScore += randomReward

@@ -17,10 +17,10 @@ _rand = (x) -> x[Math.floor Math.random() * x.length]
 # ## QLearner
 # Linear combination regresssion Q-learning agent
 exports.QLearner = class QLearner
-  constructor: (@stateSize, @actions, @rate = 0.5, @discount = 1, @bases = []) ->
-    @epsilon = 0.5
+  constructor: (@stateSize, @actions, @rate = 0.5, @discount = 0.5, @epsilon = 0.1, @bases = []) ->
+    @epsilon = 0.1
     # Add a bias term
-    @bases.unshift (-> 1)
+    #@bases.unshift (-> 1)
 
     # Init thetas to zero
     @regressors = {}
@@ -64,14 +64,14 @@ exports.QLearner = class QLearner
 exports.LinearQLearner = class LinearQLearner extends QLearner
   constructor: (@stateSize, @actions, @rate, @discount) ->
     # Generate the linear basis terms
-    bases = []
+    @bases = []
     for i in [0...@stateSize] then do (i) =>
-      bases.push (state) -> state[i]
+      @bases.push (state) -> state[i] * state[i]
       for j in [0...@stateSize] when j >= i then do (j) =>
-        bases.push (state) -> state[i] * state[j]
+        @bases.push (state) -> state[i] * state[j]
 
     # Inherit
-    super @stateSize, @actions, @rate, @discount, bases
+    super @stateSize, @actions, @rate, @discount, 0.1, @bases
 
 exports.PolynomialQLearner = class PolynomialQLearner extends QLearner
   _getBasisFunctions = (n, p) ->
