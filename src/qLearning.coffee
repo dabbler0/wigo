@@ -4,20 +4,26 @@ Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
 ###
 
-helper = require './helper'
-{Regressor} = require './regressor'
+helper = require './helper.coffee'
+{Regressor} = require './regressor.coffee'
 
 # # QLearner
 # Linear combination regresssion Q-learning agent
 exports.QLearner = class QLearner
-  constructor: (@actions, opts) ->
-    @bases ?= []
-    @rate = opts.rate ? 0.5
+  constructor: (@actions, @bases, opts) ->
+    @rate = opts.rate ? 1
     @discount = opts.discount ? 0.5
+    @forwardMode = opts.forwardMode ? 'epsilonGreedy'
+
     @epsilon = opts.epsilon ? 0.1
+    @logEpsilon = Math.log @epsilon
+    @minEpsilon = opts.minEpsilon ? 0.01
+    @epsilonFade = opts.epsilonFade ? 0
 
     # Add a bias term
     @bases.unshift (-> 1)
+
+    @rate /= @bases.length
 
     # Init thetas to zero
     @regressors = (new Regressor(@bases, @rate) for [0...@actions])
@@ -31,7 +37,7 @@ exports.QLearner = class QLearner
   # Get best action and associated predicted reward from given state
   max: (state) ->
     best = null; max = -Infinity
-    for action in @actions
+    for action in [0...@actions]
       estimate = @estimate state, action
       if estimate > max
         max = estimate; best = [action]
@@ -42,20 +48,41 @@ exports.QLearner = class QLearner
       estimate: max
     }
 
-  # ## forward
+  # ## softmax
+  # Get a random action, weighted by the expected
+  # reward of the actions (all made positive with e^x).
+  softmax: (state) ->
+    weights = (helper._pow(@estimate state, action) for action in [0...@actions])
+    action = helper._weightedRandom weights
+    return {
+      action: action
+      estimate: @estimate state, action
+    }
+
+  # ## epsilonGreedy
   # Get best action, except with probability epsilon,
   # in which case get random action. This is important
   # so the agent keeps exploring and learning.
-  forward: (state) ->
+  epsilonGreedy: (state) ->
     if Math.random() < @epsilon
       return {
-        action: action = _rand @actions
+        action: action = helper._rand @actions
         estimate: @estimate state, action
       }
     else @max state
 
+  # ## forward
+  # Return the chosen action based on the strategy in the opts
+  forward: (state) ->
+    if @forwardMode is 'softmax'
+      return @softmax state
+    else
+      @logEpsilon -= @epsilonFade
+      @epsilon = Math.max @minEpsilon, Math.pow Math.E, @logEpsilon
+      return @epsilonGreedy state
+
   # ## learn
   # Update linreg coefficients to learn
   # from given action/reward pair.
-  learn: (state, action, newState, reward) ->
+  backward: (state, action, newState, reward) ->
     @regressors[action].feed state, reward + @discount * @forward(newState).estimate

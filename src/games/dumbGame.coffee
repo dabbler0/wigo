@@ -3,7 +3,8 @@ WIGO Dumb game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
 ###
-{Game} = require './game'
+{Game} = require '../game.coffee'
+helper = require '../helper.coffee'
 
 # # DumbGame
 # An example game. It is dumb.
@@ -13,17 +14,19 @@ MIT License.
 # you get a point, otherwise you lose a point.
 exports.DumbGame = class DumbGame extends Game
   constructor: ->
-    super 2, 2
-    @state.layers[0][0] = 1
-    @state.layers[0][1] = 0
+    super 2, 2, 1
 
   advance: (action) ->
+    # See if the agent was correct
     if (@state.layers[0][0] > @state.layers[0][1]) is (action is 0)
       reward = 1
     else
       reward = -1
-    @state.layers[0][0] = _randomBit()
+
+    # Pick new random numbers
+    @state.layers[0][0] = helper._randBit()
     @state.layers[0][1] = 1 - @state.layers[0][0]
-    return reward
+
+    return {reward: reward, turn: 0}
 
   render: -> "#{@state.layers[0][0]},#{@state.layers[0][1]}"

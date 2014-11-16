@@ -27,4 +27,3 @@ exports.Regressor = class Regressor
     gradient = @estimate(input) - output
     for basis, i in @bases
       @thetas[i] -= @rate * (gradient + @lambda * @thetas[i] / @thetas.length) * basis(input)
-

@@ -1,0 +1,22 @@
+{
+  "name": "wigo",
+  "version": "0.0.0",
+  "homepage": "https://github.com/dabbler0/wigo",
+  "authors": [
+    "Anthony Bau <dab1998@gmail.com>"
+  ],
+  "moduleType": [
+    "node"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.1"
+  }
+}

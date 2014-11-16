@@ -12,9 +12,9 @@ exports.State = class State
 
   # ## clone
   clone: ->
-    clone = new State @layers.length, @size
+    clone = new State @size, @layers.length
     for layer, i in @layers
-      for bit, j in layers
+      for bit, j in layer
         clone.layers[i][j] = bit
     return clone
 
@@ -23,16 +23,16 @@ exports.State = class State
   # and call fn on each
   eachBit: (fn) ->
     for layer, i in @layers
-      for bit, j in layers
+      for bit, j in layer
         fn i, j
 
   # ## combinators
   # Get all possible sets of coordinates of size (degree)
   combinators: (degree) ->
     if degree > 1
-      subcombinators = @andCombinators degree - 1
+      subcombinators = @combinators degree - 1
     else
-      subcombinators = []
+      subcombinators = [[]]
 
     combinators = []
 
@@ -42,7 +42,7 @@ exports.State = class State
 
     return combinators
 
-  # # andCombinators
+  # ## andCombinators
   # Return a set of functions that (and) all of the bits
   # at all possible sets of coordinates of size (degree)
   andCombinators: (degree) ->
@@ -53,7 +53,7 @@ exports.State = class State
             return 0
         return 1
 
-  # # orCombinators
+  # ## orCombinators
   # The "or" analogue to andCombinators
   orCombinators: (degree) ->
     return @combinators(degree).map (combination) =>
@@ -76,4 +76,3 @@ exports.Game = class Game
   # ## render
   # Return a logging string graphically representing the string.
   render: -> ''
-
