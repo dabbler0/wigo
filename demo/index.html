@@ -1,15 +1,65 @@
 <html>
   <head>
     <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css"/>
+    <style>
+      .input-group {
+        margin: 5px;
+      }
+      #epsilon-options {
+        display: none;
+      }
+    </style>
   </head>
   <body>
-    <center>
-      <h1>W.I.G.O. Q/SARSA-Learning Demo</h1>
-      <div id="score"></div>
-      <canvas id="render" width="500" height="500"></canvas>
-      <form>
-        Speed <input id="speed" class="form-control" min="0" max="1000" type="range"/>
-      </form>
+    <div class="container">
+      <center>
+        <h1>W.I.G.O. Q/SARSA-Learning Demo</h1>
+        <div id="score"></div>
+        <canvas id="render" width="500" height="500"></canvas><br/>
+        <div class="container">
+          <div class="input-group">
+            <span class="input-group-addon">Frame rate</span>
+            <input id="speed" class="form-control" value="10"/>
+          </div>
+        </div><br/>
+        <div class="container">
+          <h2> Configure Agent </h2>
+          <form>
+            <div class="input-group">
+              <span class="input-group-addon">Discount Factor</span>
+              <input id="discount" class="form-control" value="0.9"/>
+            </div>
+            <div class="input-group">
+              <span class="input-group-addon">Forward Mode</span>
+              <select id="forward-mode"class="form-control">
+                <option value="softmax">Softmax</option>
+                <option value="epsilon-greedy">Epsilon-Greedy</option>
+              </select>
+            </div>
+            <div id="epsilon-options">
+              <div class="input-group">
+                <span class="input-group-addon">Epsilon</span>
+                <input id="epsilon-epsilon" class="form-control" value="0.1"/>
+              </div>
+              <div class="input-group">
+                <span class="input-group-addon">Epsilon Fade</span>
+                <input id="epsilon-fade" class="form-control" value="0.0001"/>
+              </div>
+              <div class="input-group">
+                <span class="input-group-addon">Minimum Epsilon</span>
+                <input id="epsilon-min" class="form-control" value="0.01"/>
+              </div>
+            </div>
+            <div id="softmax-options">
+              <div class="input-group">
+                <span class="input-group-addon">Temperature</span>
+                <input id="softmax-temperature" class="form-control" value="1"/>
+              </div>
+            </div>
+            <button id="apply" class="btn btn-primary">Apply</button>
+          </form>
+        </div>
+      </center>
     </div>
     <script src="../build/browser.js"></script>
     <script src="js/demo.js"></script>

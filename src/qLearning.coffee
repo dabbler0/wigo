@@ -20,6 +20,8 @@ exports.QLearner = class QLearner
     @minEpsilon = opts.minEpsilon ? 0.01
     @epsilonFade = opts.epsilonFade ? 0
 
+    @temperature = opts.temperature ? 1
+
     # Add a bias term
     @bases.unshift (-> 1)
 
@@ -52,7 +54,7 @@ exports.QLearner = class QLearner
   # Get a random action, weighted by the expected
   # reward of the actions (all made positive with e^x).
   softmax: (state) ->
-    weights = (helper._pow(@estimate state, action) for action in [0...@actions])
+    weights = (helper._pow(@estimate(state, action) / @temperature) for action in [0...@actions])
     action = helper._weightedRandom weights
     return {
       action: action
@@ -85,4 +87,4 @@ exports.QLearner = class QLearner
   # Update linreg coefficients to learn
   # from given action/reward pair.
   backward: (state, action, newState, reward) ->
-    @regressors[action].feed state, reward + @discount * @forward(newState).estimate
+    @regressors[action].feed state, reward + if newState? then @discount * @forward(newState).estimate else 0

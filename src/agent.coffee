@@ -21,10 +21,10 @@ exports.Agent = class Agent
 
     # Get said action and act upon it
     {action, estimate} = @learner.forward @game.state
-    {reward, turn} = @game.advance action
+    {reward, turn, terminated} = @game.advance action
 
     # Learn from the reward
-    @learner.backward oldState, action, @game.state, reward
+    @learner.backward oldState, action, (if terminated then null else @game.state), reward
 
     return reward
 

@@ -23,6 +23,8 @@ exports.GridGame = class GridGame extends Game
 
     # Place player
     @state.layers[0][0] = 1
+    @state.layers[2][0] = 1
+    @prizeIndex = 0
 
   _coord: (index) -> {x: index % @w, y: (index - (index % @w)) / @w}
   _index: (coord) -> coord.x + coord.y * @w
@@ -65,10 +67,7 @@ exports.GridGame = class GridGame extends Game
     if @state.layers[2][@_index(newCoord)] is 1
       prize = true
       @state.layers[2][@_index(newCoord)] = 0
-
-    # Possibly make a new prize
-    if Math.random() < PRIZE_SPAWN_PROBABILITY
-      @state.layers[2][helper._rand @_corners()] = 1
+      @state.layers[2][@_corners()[(@prizeIndex += 1) %% 4]] = 1
 
     # Move the player
     @state.layers[0][@_index(coord)] = 0

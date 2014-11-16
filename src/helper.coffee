@@ -11,7 +11,7 @@ exports._rand = _rand = (x) ->
 
 exports._randBit = _randBit = -> if Math.random() < 0.5 then 1 else 0
 
-exports._pow = _pow = (x) -> Math.pow 10, x
+exports._pow = _pow = (x) -> Math.pow Math.E, x
 
 exports._sum = _sum = (list) ->
   s = 0

@@ -20,11 +20,11 @@ exports.Agent = Agent = (function() {
   }
 
   Agent.prototype.act = function() {
-    var action, estimate, oldState, reward, turn, _ref, _ref1;
+    var action, estimate, oldState, reward, terminated, turn, _ref, _ref1;
     oldState = this.game.state.clone();
     _ref = this.learner.forward(this.game.state), action = _ref.action, estimate = _ref.estimate;
-    _ref1 = this.game.advance(action), reward = _ref1.reward, turn = _ref1.turn;
-    this.learner.backward(oldState, action, this.game.state, reward);
+    _ref1 = this.game.advance(action), reward = _ref1.reward, turn = _ref1.turn, terminated = _ref1.terminated;
+    this.learner.backward(oldState, action, (terminated ? null : this.game.state), reward);
     return reward;
   };
 
@@ -41,7 +41,7 @@ exports.Agent = Agent = (function() {
 })();
 
 
-},{"./qLearning.coffee":9}],2:[function(require,module,exports){
+},{"./qLearning.coffee":10}],2:[function(require,module,exports){
 var Agent, helper;
 
 helper = require('./helper.coffee');
@@ -53,11 +53,12 @@ module.exports = {
   GridGame: require('./games/grid.coffee').GridGame,
   DumbGame: require('./games/dumbGame.coffee').DumbGame,
   ChaseGame: require('./games/chase.coffee').ChaseGame,
+  Blackjack: require('./games/blackjack.coffee').Blackjack,
   Agent: Agent
 };
 
 
-},{"./agent.coffee":1,"./games/chase.coffee":4,"./games/dumbGame.coffee":5,"./games/grid.coffee":6,"./games/path.coffee":7,"./helper.coffee":8}],3:[function(require,module,exports){
+},{"./agent.coffee":1,"./games/blackjack.coffee":4,"./games/chase.coffee":5,"./games/dumbGame.coffee":6,"./games/grid.coffee":7,"./games/path.coffee":8,"./helper.coffee":9}],3:[function(require,module,exports){
 
 /*
 WIGO game definition schema
@@ -201,6 +202,119 @@ exports.Game = Game = (function() {
 
 
 },{}],4:[function(require,module,exports){
+
+/*
+WIGO Dumb game
+Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
+MIT License.
+ */
+var Blackjack, Game, helper,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+Game = require('../game.coffee').Game;
+
+helper = require('../helper.coffee');
+
+exports.Blackjack = Blackjack = (function(_super) {
+  __extends(Blackjack, _super);
+
+  function Blackjack() {
+    Blackjack.__super__.constructor.call(this, 52, 2, 1);
+    this.remainingCards = 52;
+  }
+
+  Blackjack.prototype.reset = function() {
+    this.state.eachBit((function(_this) {
+      return function(i, j) {
+        return _this.state.layers[i][j] = 0;
+      };
+    })(this));
+    return this.remainingCards = 52;
+  };
+
+  Blackjack.prototype.getSum = function() {
+    var j, sum, val, _i, _len, _ref;
+    sum = 0;
+    _ref = this.state.layers[0];
+    for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+      val = _ref[j];
+      if (val === 1) {
+        sum += Math.ceil(j / 4);
+      }
+    }
+    return sum;
+  };
+
+  Blackjack.prototype.advance = function(action) {
+    var i, j, reward, target, val, _i, _len, _ref;
+    if (action === 0) {
+      reward = this.getSum();
+      this.reset();
+      if (reward > 10) {
+        return {
+          reward: 1,
+          turn: 0,
+          terminated: true
+        };
+      } else {
+        return {
+          reward: -1,
+          turn: 0,
+          terminated: true
+        };
+      }
+    } else {
+      target = helper._rand(this.remainingCards);
+      i = 0;
+      _ref = this.state.layers[0];
+      for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+        val = _ref[j];
+        if (val === 0) {
+          if (i === target) {
+            this.state.layers[0][j] = 1;
+            break;
+          } else {
+            i++;
+          }
+        }
+      }
+      if (this.getSum() > 21) {
+        this.reset();
+        return {
+          reward: -1,
+          turn: 0,
+          terminated: true
+        };
+      } else {
+        return {
+          reward: 0,
+          turn: 0,
+          terminated: false
+        };
+      }
+    }
+  };
+
+  Blackjack.prototype.render = function() {
+    var j, str, val, _i, _len, _ref;
+    str = '';
+    _ref = this.state.layers[0];
+    for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
+      val = _ref[j];
+      if (val === 1) {
+        str += Math.ceil(j / 4) + ',';
+      }
+    }
+    return str;
+  };
+
+  return Blackjack;
+
+})(Game);
+
+
+},{"../game.coffee":3,"../helper.coffee":9}],5:[function(require,module,exports){
 
 /*
 WIGO Dumb game
@@ -406,7 +520,7 @@ exports.ChaseGame = ChaseGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":8}],5:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":9}],6:[function(require,module,exports){
 
 /*
 WIGO Dumb game
@@ -452,7 +566,7 @@ exports.DumbGame = DumbGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":8}],6:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":9}],7:[function(require,module,exports){
 
 /*
 WIGO Dumb game
@@ -462,7 +576,8 @@ MIT License.
 var Game, GridGame, PRIZE_SPAWN_PROBABILITY, WALL_DENSITY, helper,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+  __modulo = function(a, b) { return (a % b + +b) % b; };
 
 Game = require('../game.coffee').Game;
 
@@ -492,6 +607,8 @@ exports.GridGame = GridGame = (function(_super) {
       }
     }
     this.state.layers[0][0] = 1;
+    this.state.layers[2][0] = 1;
+    this.prizeIndex = 0;
   }
 
   GridGame.prototype._coord = function(index) {
@@ -566,9 +683,7 @@ exports.GridGame = GridGame = (function(_super) {
     if (this.state.layers[2][this._index(newCoord)] === 1) {
       prize = true;
       this.state.layers[2][this._index(newCoord)] = 0;
-    }
-    if (Math.random() < PRIZE_SPAWN_PROBABILITY) {
-      this.state.layers[2][helper._rand(this._corners())] = 1;
+      this.state.layers[2][this._corners()[__modulo((this.prizeIndex += 1), 4)]] = 1;
     }
     this.state.layers[0][this._index(coord)] = 0;
     this.state.layers[0][this._index(newCoord)] = 1;
@@ -646,7 +761,7 @@ exports.GridGame = GridGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":8}],7:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":9}],8:[function(require,module,exports){
 
 /*
 WIGO Dumb game
@@ -902,7 +1017,7 @@ exports.PathGame = PathGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":8}],8:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":9}],9:[function(require,module,exports){
 
 /*
 WIGO helper functions.
@@ -955,7 +1070,7 @@ exports._weightedRandom = function(list) {
 };
 
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 
 /*
 WIGO Q-Learning/SARSA-Learning implementation
@@ -1057,7 +1172,7 @@ exports.QLearner = QLearner = (function() {
   };
 
   QLearner.prototype.backward = function(state, action, newState, reward) {
-    return this.regressors[action].feed(state, reward + this.discount * this.forward(newState).estimate);
+    return this.regressors[action].feed(state, reward + (newState != null ? this.discount * this.forward(newState).estimate : 0));
   };
 
   return QLearner;
@@ -1065,7 +1180,7 @@ exports.QLearner = QLearner = (function() {
 })();
 
 
-},{"./helper.coffee":8,"./regressor.coffee":10}],10:[function(require,module,exports){
+},{"./helper.coffee":9,"./regressor.coffee":11}],11:[function(require,module,exports){
 
 /*
 WIGO stochastic regularized gradient descent linear regression implementation

@@ -7,7 +7,8 @@ module.exports = {
   GridGame: require('./games/grid.coffee').GridGame
   DumbGame: require('./games/dumbGame.coffee').DumbGame
   ChaseGame: require('./games/chase.coffee').ChaseGame
+  Blackjack: require('./games/blackjack.coffee').Blackjack
 
-  # Also export the Agent class for tweaking
+  # Agent class
   Agent: Agent
 }
