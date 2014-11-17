@@ -1,7 +1,7 @@
 Well-Informed Game Operator
 ===========================
 
-This is an implementation of S.A.R.S'.A'.-Learning based on linear regression.
+This is an implementation of S.A.R.S'.A'.-Learning based on linear regression. It is designed to play, without prior knowledge, any game with discrete inputs and discrete outputs. It learns while playing, so will lose for a while at first, then start winning as it learns to play. For a demo with a bunch of different example games, see here: http://dabbler0.github.io/wigo.
 
 Usage
 -----
