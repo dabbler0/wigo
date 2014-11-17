@@ -27,3 +27,14 @@ exports.Regressor = class Regressor
     gradient = @estimate(input) - output
     for basis, i in @bases
       @thetas[i] -= @rate * (gradient + @lambda * @thetas[i] / @thetas.length) * basis(input)
+
+  serialize: -> {
+    thetas: @thetas
+    rate: @rate
+    lambda: @lambda
+  }
+
+Regressor.fromSerialized = (bases, serialized) ->
+  k = new Regressor bases, serialized.rate, serialized.lambda
+  k.thetas = serialized.thetas
+  return k

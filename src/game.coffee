@@ -76,3 +76,7 @@ exports.Game = class Game
   # ## render
   # Return a logging string graphically representing the string.
   render: -> ''
+
+  # ## renderCanvas
+  # Render onto an HTML5 canvas.
+  renderCanvas: (canvas, ctx) ->

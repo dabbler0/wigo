@@ -10,15 +10,13 @@ helper = require './helper.coffee'
 # # QLearner
 # Linear combination regresssion Q-learning agent
 exports.QLearner = class QLearner
-  constructor: (@actions, @bases, opts) ->
+  constructor: (@actions, @bases, @opts) ->
+    opts = @opts
     @rate = opts.rate ? 1
     @discount = opts.discount ? 0.5
     @forwardMode = opts.forwardMode ? 'epsilonGreedy'
 
     @epsilon = opts.epsilon ? 0.1
-    @logEpsilon = Math.log @epsilon
-    @minEpsilon = opts.minEpsilon ? 0.01
-    @epsilonFade = opts.epsilonFade ? 0
 
     @temperature = opts.temperature ? 1
 
@@ -79,8 +77,6 @@ exports.QLearner = class QLearner
     if @forwardMode is 'softmax'
       return @softmax state
     else
-      @logEpsilon -= @epsilonFade
-      @epsilon = Math.max @minEpsilon, Math.pow Math.E, @logEpsilon
       return @epsilonGreedy state
 
   # ## learn
@@ -88,3 +84,13 @@ exports.QLearner = class QLearner
   # from given action/reward pair.
   backward: (state, action, newState, reward) ->
     @regressors[action].feed state, reward + if newState? then @discount * @forward(newState).estimate else 0
+
+  serialize: -> {
+    regressors: (regressor.serialize() for regressor in @regressors)
+    opts: @opts
+  }
+
+QLearner.fromSerialized = (action, bases, serialization) ->
+  learner = new QLearner action, bases, serialization.opts
+  learner.regressors[i] = Regressor.fromSerialized(k) for k, i in serialization
+  return learner

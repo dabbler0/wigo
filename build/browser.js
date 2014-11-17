@@ -36,9 +36,20 @@ exports.Agent = Agent = (function() {
     return reward;
   };
 
+  Agent.prototype.serialize = function() {
+    return this.learner.serialize();
+  };
+
   return Agent;
 
 })();
+
+Agent.fromSerialization = function(game, bases, serialized) {
+  var agent;
+  agent = new Agent(game, bases);
+  agent.learner = QLearner.fromSerialization(serialized);
+  return agent;
+};
 
 
 },{"./qLearning.coffee":10}],2:[function(require,module,exports){
@@ -195,6 +206,8 @@ exports.Game = Game = (function() {
   Game.prototype.render = function() {
     return '';
   };
+
+  Game.prototype.renderCanvas = function(canvas, ctx) {};
 
   return Game;
 
@@ -1042,7 +1055,7 @@ exports._randBit = _randBit = function() {
 };
 
 exports._pow = _pow = function(x) {
-  return Math.pow(10, x);
+  return Math.pow(Math.E, x);
 };
 
 exports._sum = _sum = function(list) {
@@ -1085,24 +1098,24 @@ Regressor = require('./regressor.coffee').Regressor;
 
 exports.QLearner = QLearner = (function() {
   function QLearner(actions, bases, opts) {
-    var _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+    var _ref, _ref1, _ref2, _ref3, _ref4;
     this.actions = actions;
     this.bases = bases;
+    this.opts = opts;
+    opts = this.opts;
     this.rate = (_ref = opts.rate) != null ? _ref : 1;
     this.discount = (_ref1 = opts.discount) != null ? _ref1 : 0.5;
     this.forwardMode = (_ref2 = opts.forwardMode) != null ? _ref2 : 'epsilonGreedy';
     this.epsilon = (_ref3 = opts.epsilon) != null ? _ref3 : 0.1;
-    this.logEpsilon = Math.log(this.epsilon);
-    this.minEpsilon = (_ref4 = opts.minEpsilon) != null ? _ref4 : 0.01;
-    this.epsilonFade = (_ref5 = opts.epsilonFade) != null ? _ref5 : 0;
+    this.temperature = (_ref4 = opts.temperature) != null ? _ref4 : 1;
     this.bases.unshift((function() {
       return 1;
     }));
     this.rate /= this.bases.length;
     this.regressors = (function() {
-      var _i, _ref6, _results;
+      var _i, _ref5, _results;
       _results = [];
-      for (_i = 0, _ref6 = this.actions; 0 <= _ref6 ? _i < _ref6 : _i > _ref6; 0 <= _ref6 ? _i++ : _i--) {
+      for (_i = 0, _ref5 = this.actions; 0 <= _ref5 ? _i < _ref5 : _i > _ref5; 0 <= _ref5 ? _i++ : _i--) {
         _results.push(new Regressor(this.bases, this.rate));
       }
       return _results;
@@ -1138,7 +1151,7 @@ exports.QLearner = QLearner = (function() {
       var _i, _ref, _results;
       _results = [];
       for (action = _i = 0, _ref = this.actions; 0 <= _ref ? _i < _ref : _i > _ref; action = 0 <= _ref ? ++_i : --_i) {
-        _results.push(helper._pow(this.estimate(state, action)));
+        _results.push(helper._pow(this.estimate(state, action) / this.temperature));
       }
       return _results;
     }).call(this);
@@ -1165,8 +1178,6 @@ exports.QLearner = QLearner = (function() {
     if (this.forwardMode === 'softmax') {
       return this.softmax(state);
     } else {
-      this.logEpsilon -= this.epsilonFade;
-      this.epsilon = Math.max(this.minEpsilon, Math.pow(Math.E, this.logEpsilon));
       return this.epsilonGreedy(state);
     }
   };
@@ -1175,9 +1186,36 @@ exports.QLearner = QLearner = (function() {
     return this.regressors[action].feed(state, reward + (newState != null ? this.discount * this.forward(newState).estimate : 0));
   };
 
+  QLearner.prototype.serialize = function() {
+    var regressor;
+    return {
+      regressors: (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.regressors;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          regressor = _ref[_i];
+          _results.push(regressor.serialize());
+        }
+        return _results;
+      }).call(this),
+      opts: this.opts
+    };
+  };
+
   return QLearner;
 
 })();
+
+QLearner.fromSerialized = function(action, bases, serialization) {
+  var i, k, learner, _i, _len;
+  learner = new QLearner(action, bases, serialization.opts);
+  for (i = _i = 0, _len = serialization.length; _i < _len; i = ++_i) {
+    k = serialization[i];
+    learner.regressors[i] = Regressor.fromSerialized(k);
+  }
+  return learner;
+};
 
 
 },{"./helper.coffee":9,"./regressor.coffee":11}],11:[function(require,module,exports){
@@ -1230,9 +1268,24 @@ exports.Regressor = Regressor = (function() {
     return _results;
   };
 
+  Regressor.prototype.serialize = function() {
+    return {
+      thetas: this.thetas,
+      rate: this.rate,
+      lambda: this.lambda
+    };
+  };
+
   return Regressor;
 
 })();
+
+Regressor.fromSerialized = function(bases, serialized) {
+  var k;
+  k = new Regressor(bases, serialized.rate, serialized.lambda);
+  k.thetas = serialized.thetas;
+  return k;
+};
 
 
 },{}]},{},[2])(2)

@@ -3,64 +3,107 @@
     <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css"/>
     <style>
       .input-group {
-        margin: 5px;
+        margin-bottom: 5px;
+        margin-top: 5px;
       }
       #epsilon-options {
         display: none;
       }
+      canvas {
+        width: 100%;
+      }
     </style>
   </head>
   <body>
-    <div class="container">
-      <center>
-        <h1>W.I.G.O. Q/SARSA-Learning Demo</h1>
+    <div class="row">
+      <div class="col-md-12">
+        <center>
+          <h1>W.I.G.O. Q/SARSA-Learning Demo</h1>
+        </center>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <center>
+          <canvas id="render"></canvas><br/>
+        </center>
+      </div>
+      <div class="col-md-4">
         <div id="score"></div>
-        <canvas id="render" width="500" height="500"></canvas><br/>
-        <div class="container">
+        <center>
+          <canvas id="graph"></canvas><br/>
+        </center>
+      </div>
+      <div class="col-md-4">
+        <div>
+          <h2> Gameplay </h2>
           <div class="input-group">
             <span class="input-group-addon">Frame rate</span>
             <input id="speed" class="form-control" value="10"/>
           </div>
-        </div><br/>
-        <div class="container">
-          <h2> Configure Agent </h2>
-          <form>
-            <div class="input-group">
-              <span class="input-group-addon">Discount Factor</span>
-              <input id="discount" class="form-control" value="0.9"/>
-            </div>
-            <div class="input-group">
-              <span class="input-group-addon">Forward Mode</span>
-              <select id="forward-mode"class="form-control">
-                <option value="softmax">Softmax</option>
-                <option value="epsilon-greedy">Epsilon-Greedy</option>
-              </select>
-            </div>
-            <div id="epsilon-options">
-              <div class="input-group">
-                <span class="input-group-addon">Epsilon</span>
-                <input id="epsilon-epsilon" class="form-control" value="0.1"/>
-              </div>
-              <div class="input-group">
-                <span class="input-group-addon">Epsilon Fade</span>
-                <input id="epsilon-fade" class="form-control" value="0.0001"/>
-              </div>
-              <div class="input-group">
-                <span class="input-group-addon">Minimum Epsilon</span>
-                <input id="epsilon-min" class="form-control" value="0.01"/>
-              </div>
-            </div>
-            <div id="softmax-options">
-              <div class="input-group">
-                <span class="input-group-addon">Temperature</span>
-                <input id="softmax-temperature" class="form-control" value="1"/>
-              </div>
-            </div>
-            <button id="apply" class="btn btn-primary">Apply</button>
-          </form>
+          <div class="checkbox">
+            <label><input type="checkbox" id="show-history" checked/>Show score history</label>
+          </div>
+          <div class="checkbox">
+            <label><input type="checkbox" id="render-board" checked/>Render board</label>
+          </div>
         </div>
-      </center>
+        <div>
+          <h2> Configure Game </h2>
+          <div class="input-group">
+            <span class="input-group-addon">Choose Game</span>
+            <select id="game"class="form-control">
+              <option value="grid">Treasure Hunt</option>
+              <option value="path">Lava</option>
+              <option value="blackjack">Blackjack</option>
+              <option value="chase">Chase</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <h2> Configure Agent </h2>
+          <div class="input-group">
+            <span class="input-group-addon">Bases</span>
+            <select id="bases" class="form-control">
+              <option value="strict-linear">Simple linear</option>
+              <option value="degree-2">Degree 2 "and" combinations</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">Learning Rate</span>
+            <input id="learning-rate" class="form-control" value="1"/>
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">Discount Factor</span>
+            <input id="discount-factor" class="form-control" value="0.9"/>
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">Forward Mode</span>
+            <select id="forward-mode"class="form-control">
+              <option value="softmax">Softmax</option>
+              <option value="epsilon-greedy">Epsilon-Greedy</option>
+            </select>
+          </div>
+          <div id="epsilon-options">
+            <div class="input-group">
+              <span class="input-group-addon">Epsilon</span>
+              <input id="epsilon-epsilon" class="form-control" value="0.1"/>
+            </div>
+          </div>
+          <div id="softmax-options">
+            <div class="input-group">
+              <span class="input-group-addon">Temperature</span>
+              <input id="softmax-temperature" class="form-control" value="1"/>
+            </div>
+          </div>
+        </div>
+        <button id="apply" class="btn btn-large btn-primary">Start Game</button>
+        <button id="export-history" class="btn btn-large btn-primary">Export Score History</button>
+        <button id="export-params" class="btn btn-large btn-primary">Export Agent Data</button>
+        </div>
     </div>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="../bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <script src="../build/browser.js"></script>
     <script src="js/demo.js"></script>
   </body>
