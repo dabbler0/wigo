@@ -13,6 +13,6 @@ move = ->
   process.stdout.write("\u001b[2J\u001b[0;0H")
   console.log score
   console.log game.render()
-  console.log _zip([agent.learner.regressors[0].thetas, agent.learner.regressors[1].thetas]).map((x) -> x.join('\t')).join('\n')
+  #console.log _zip([agent.learner.regressors[0].thetas, agent.learner.regressors[1].thetas]).map((x) -> x.join('\t')).join('\n')
   setTimeout move, 10
 move()
