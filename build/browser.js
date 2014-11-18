@@ -64,12 +64,12 @@ module.exports = {
   GridGame: require('./games/grid.coffee').GridGame,
   DumbGame: require('./games/dumbGame.coffee').DumbGame,
   ChaseGame: require('./games/chase.coffee').ChaseGame,
-  Blackjack: require('./games/blackjack.coffee').Blackjack,
+  NotGame: require('./games/2048.coffee').NotGame,
   Agent: Agent
 };
 
 
-},{"./agent.coffee":1,"./games/blackjack.coffee":4,"./games/chase.coffee":5,"./games/dumbGame.coffee":6,"./games/grid.coffee":7,"./games/path.coffee":8,"./helper.coffee":9}],3:[function(require,module,exports){
+},{"./agent.coffee":1,"./games/2048.coffee":4,"./games/chase.coffee":5,"./games/dumbGame.coffee":6,"./games/grid.coffee":7,"./games/path.coffee":8,"./helper.coffee":9}],3:[function(require,module,exports){
 
 /*
 WIGO game definition schema
@@ -217,162 +217,204 @@ exports.Game = Game = (function() {
 },{}],4:[function(require,module,exports){
 
 /*
-WIGO Dumb game
+WIGO 2048 game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
  */
-var Blackjack, Game, helper,
+var Game, NotGame, SPAWN_FOUR_PROBABILITY,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Game = require('../game.coffee').Game;
 
-helper = require('../helper.coffee');
+SPAWN_FOUR_PROBABILITY = 0.1;
 
-exports.Blackjack = Blackjack = (function(_super) {
-  var _cardNames, _suits;
+exports.NotGame = NotGame = (function(_super) {
+  var dirs;
 
-  __extends(Blackjack, _super);
+  __extends(NotGame, _super);
 
-  function Blackjack() {
-    Blackjack.__super__.constructor.call(this, 52, 2, 2);
-    this.remainingCards = 52;
-    this.reshuffle();
+  dirs = {
+    0: [0, -1],
+    1: [1, 0],
+    2: [0, 1],
+    3: [-1, 0]
+  };
+
+  function NotGame() {
+    NotGame.__super__.constructor.call(this, 16, 4, 12);
+    this.addRandom();
+    this.addRandom();
   }
 
-  Blackjack.prototype.reshuffle = function() {
-    this.state.eachBit((function(_this) {
-      return function(i, j) {
-        return _this.state.layers[i][j] = 0;
-      };
-    })(this));
-    this.reminaingCards = 0;
-    return this.dealTo(1);
+  NotGame.prototype.convert = function(i, j) {
+    return i * 4 + j;
   };
 
-  Blackjack.prototype.getValue = function(i) {
-    return Math.ceil(i / 4);
-  };
-
-  Blackjack.prototype.used = function(i) {
-    var layer, _i, _len, _ref;
-    _ref = this.state.layers;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      layer = _ref[_i];
-      if (layer[i] === 1) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  Blackjack.prototype.deal = function() {
-    var i, j, target, _i;
-    target = helper._rand(this.remainingCards);
-    j = 0;
-    for (i = _i = 0; _i < 52; i = ++_i) {
-      if (!(!this.used(i))) {
-        continue;
-      }
-      j++;
-      if (j === target) {
-        return j;
-      }
-    }
-    return 52;
-  };
-
-  Blackjack.prototype.dealTo = function(layer) {
-    var card;
-    card = this.deal();
-    return this.state.layers[layer][card] = 1;
-  };
-
-  Blackjack.prototype.sum = function(layer) {
-    var i, sum, _i;
-    sum = 0;
-    for (i = _i = 0; _i < 52; i = ++_i) {
-      if (this.state.layers[layer][i] === 1) {
-        sum += this.getValue(i);
-      }
-    }
-    return sum;
-  };
-
-  Blackjack.prototype.advance = function(action) {
-    if (action === 0) {
-      this.dealTo(0);
-      if (this.sum(0) > 21) {
-        this.reshuffle();
-        return {
-          reward: -1,
-          turn: 0
-        };
-      }
-      return {
-        reward: 0,
-        turn: 0
-      };
-    } else {
-
-      /*
-      until (sum = @sum(1)) > 15
-        @dealTo 1
-      
-      if sum > 21
-        @reshuffle()
-        return {reward: 11, turn: 0}
-      else if @sum(0) > sum
-        @reshuffle()
-        return {reward: 11, turn: 0}
-      else
-        @reshuffle()
-        return {reward: -10, turn: 0}
-       */
-      if (this.sum(0) > 15) {
-        this.reshuffle();
-        return {
-          reward: 1,
-          turn: 0
-        };
-      } else {
-        this.reshuffle();
-        return {
-          reward: -1,
-          turn: 0
-        };
-      }
-    }
-  };
-
-  _cardNames = 'A 2 3 4 5 6 7 8 9 10 J Q K'.split(' ');
-
-  _suits = '\u2660 \u2665 \u2666 \u2663'.split(' ');
-
-  Blackjack.prototype.renderCard = function(i) {
-    return _cardNames[Math.floor(i / 4)] + _suits[i % 4];
-  };
-
-  Blackjack.prototype.render = function() {
-    var i, layer, str, _i, _j;
-    str = '';
-    for (layer = _i = 1; _i >= 0; layer = --_i) {
-      for (i = _j = 0; _j < 52; i = ++_j) {
-        if (this.state.layers[layer][i] === 1) {
-          str += this.renderCard(i) + ' ';
+  NotGame.prototype.addRandom = function() {
+    var free, i, j, n, _i, _j;
+    free = [];
+    for (i = _i = 0; _i < 4; i = ++_i) {
+      for (j = _j = 0; _j < 4; j = ++_j) {
+        if (this.value(this.convert(i, j)) === 0) {
+          free.push(this.convert(i, j));
         }
+      }
+    }
+    if (free.length > 0) {
+      n = free[Math.floor(Math.random() * free.length)];
+      return this.state.layers[Math.random() > (1 - SPAWN_FOUR_PROBABILITY) ? 2 : 1][n] = 1;
+    }
+  };
+
+  NotGame.prototype.value = function(pos) {
+    var l, _i;
+    for (l = _i = 0; _i < 12; l = ++_i) {
+      if (this.state.layers[l][pos]) {
+        return l;
+      }
+    }
+    return 0;
+  };
+
+  NotGame.prototype.valid = function(x, y) {
+    return x >= 0 && x < 4 && y >= 0 && y < 4;
+  };
+
+  NotGame.prototype.getNext = function(x, y, dir) {
+    var cur, prev;
+    prev = [x, y];
+    cur = [x + dirs[dir][0], y + dirs[dir][1]];
+    while (this.valid(cur[0], cur[1]) && this.value(this.convert(cur[0], cur[1])) === 0) {
+      prev[0] = cur[0];
+      prev[1] = cur[1];
+      cur = [cur[0] + dirs[dir][0], cur[1] + dirs[dir][1]];
+    }
+    return {
+      farthest: prev,
+      next: this.convert(cur[0], cur[1])
+    };
+  };
+
+  NotGame.prototype.lost = function() {
+    var d, i, j, other, val, _i, _j, _k, _l;
+    for (i = _i = 0; _i < 16; i = ++_i) {
+      if (this.value(i) === 0) {
+        return false;
+      }
+    }
+    for (i = _j = 0; _j < 4; i = ++_j) {
+      for (j = _k = 0; _k < 4; j = ++_k) {
+        val = this.value(this.convert(i, j));
+        if (val !== 0) {
+          for (d = _l = 0; _l < 4; d = ++_l) {
+            other = [i + dirs[d][0], j + dirs[d][1]];
+            if (this.valid(other[0], other[1])) {
+              if (this.value(this.convert(other[0], other[1])) === val) {
+                return false;
+              }
+            }
+          }
+        }
+      }
+    }
+    return true;
+  };
+
+  NotGame.prototype.advance = function(action) {
+    var i, j, l, merged, moved, next, p, ret, reward, terminated, val, x, y, _i, _j, _k, _l, _m;
+    console.log('action is ' + action);
+    merged = (function() {
+      var _i, _results;
+      _results = [];
+      for (_i = 0; _i < 16; _i++) {
+        _results.push(false);
+      }
+      return _results;
+    })();
+    x = [];
+    y = [];
+    for (i = _i = 0; _i < 4; i = ++_i) {
+      x.push(i);
+      y.push(i);
+    }
+    if (dirs[action][0] === 1) {
+      x = x.reverse();
+    }
+    if (dirs[action][1] === 1) {
+      y = y.reverse();
+    }
+    reward = 0;
+    moved = false;
+    terminated = false;
+    for (i = _j = 0; _j < 4; i = ++_j) {
+      for (j = _k = 0; _k < 4; j = ++_k) {
+        val = this.value(this.convert(x[i], y[j]));
+        if (val !== 0) {
+          ret = this.getNext(x[i], y[j], action);
+          next = ret.next;
+          if (this.value(next) === val && !merged[next]) {
+            this.state.layers[val + 1][next] = 1;
+            this.state.layers[val][this.convert(x[i], y[j])] = 0;
+            this.state.layers[val][next] = 0;
+            reward += Math.pow(2, val + 1);
+            moved = true;
+            if (val === 10) {
+              terminated = true;
+              break;
+            }
+            merged[this.convert(x[i], y[j])] = true;
+          } else if (x[i] !== ret.farthest[0] || y[j] !== ret.farthest[1]) {
+            this.state.layers[val][this.convert(x[i], y[j])] = 0;
+            this.state.layers[val][this.convert(ret.farthest[0], ret.farthest[1])] = 1;
+            moved = true;
+          }
+        }
+      }
+    }
+    if (moved) {
+      this.addRandom();
+    } else {
+      reward = -32;
+    }
+    if (this.lost()) {
+      terminated = true;
+      reward = -2048;
+    }
+    if (terminated) {
+      for (l = _l = 0; _l < 12; l = ++_l) {
+        for (p = _m = 0; _m < 16; p = ++_m) {
+          this.state.layers[l][p] = 0;
+        }
+      }
+      this.addRandom();
+      this.addRandom();
+    }
+    return {
+      reward: reward,
+      turn: 0,
+      terminated: terminated
+    };
+  };
+
+  NotGame.prototype.render = function() {
+    var i, j, str, _i, _j;
+    str = '';
+    for (i = _i = 0; _i < 4; i = ++_i) {
+      for (j = _j = 0; _j < 4; j = ++_j) {
+        str += (Math.pow(2, this.value(this.convert(i, j))) & 2046) + (j !== 3 ? '\t' : '');
       }
       str += '\n';
     }
     return str;
   };
 
-  return Blackjack;
+  return NotGame;
 
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":9}],5:[function(require,module,exports){
+},{"../game.coffee":3}],5:[function(require,module,exports){
 
 /*
 WIGO Dumb game

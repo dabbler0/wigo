@@ -61,7 +61,6 @@ exports.Blackjack = class Blackjack extends Game
         return {reward: 1, turn: 0, terminated: true}
       else
         return {reward: -1, turn: 0, terminated: true}
-
     else
       target = helper._rand @remainingCards
       i = 0
@@ -76,18 +75,6 @@ exports.Blackjack = class Blackjack extends Game
         return {reward: -1, turn: 0, terminated: true}
       else
         return {reward: 0, turn: 0, terminated: false}
-
-  render: ->
-    str = ''
-    for val,  j in @state.layers[0] when val is 1
-      str += Math.ceil(j / 4) + ','
-
-=======
-      @dealTo 0
-      if @sum(0) > 21
-        @reshuffle()
-        return {reward: -1, turn: 0}
-      return {reward: 0, turn: 0}
 
     else
       ###

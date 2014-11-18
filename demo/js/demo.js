@@ -120,7 +120,8 @@
     'grid': wigo.GridGame,
     'path': wigo.PathGame,
     'chase': wigo.ChaseGame,
-    'blackjack': wigo.Blackjack
+    'blackjack': wigo.Blackjack,
+    '2048': wigo.NotGame
   };
 
   getGame = function() {
