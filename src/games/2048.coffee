@@ -18,6 +18,8 @@ exports.NotGame = class NotGame extends Game
 
   constructor: ->
     super 16, 4, 12
+    for i in [0...16]
+      @state.layers[0][i] = true
     # Add two random initial tiles
     @addRandom()
     @addRandom()
@@ -118,9 +120,11 @@ exports.NotGame = class NotGame extends Game
       terminated = true
       reward = -2048
     if terminated
-      for l in [0...12]
+      for l in [1...12]
         for p in [0...16]
           @state.layers[l][p] = 0
+      for i in [0...16]
+        @state.layers[0][i] = true
       @addRandom()
       @addRandom()
     return {
@@ -133,6 +137,6 @@ exports.NotGame = class NotGame extends Game
     str = ''
     for i in [0...4]
       for j in [0...4]
-        str += (2 ** @value(@convert(i, j)) & 2046) + (if j isnt 3 then '\t' else '')
+        str += @value(@convert(i, j)) + (if j isnt 3 then '\t' else '')
       str += '\n'
     return str
