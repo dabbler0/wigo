@@ -242,7 +242,11 @@ exports.NotGame = NotGame = (function(_super) {
   };
 
   function NotGame() {
+    var i, _i;
     NotGame.__super__.constructor.call(this, 16, 4, 12);
+    for (i = _i = 0; _i < 16; i = ++_i) {
+      this.state.layers[0][i] = true;
+    }
     this.addRandom();
     this.addRandom();
   }
@@ -322,7 +326,7 @@ exports.NotGame = NotGame = (function(_super) {
   };
 
   NotGame.prototype.advance = function(action) {
-    var i, j, l, merged, moved, next, p, ret, reward, terminated, val, x, y, _i, _j, _k, _l, _m;
+    var i, j, l, merged, moved, next, p, ret, reward, terminated, val, x, y, _i, _j, _k, _l, _m, _n;
     console.log('action is ' + action);
     merged = (function() {
       var _i, _results;
@@ -382,10 +386,13 @@ exports.NotGame = NotGame = (function(_super) {
       reward = -2048;
     }
     if (terminated) {
-      for (l = _l = 0; _l < 12; l = ++_l) {
+      for (l = _l = 1; _l < 12; l = ++_l) {
         for (p = _m = 0; _m < 16; p = ++_m) {
           this.state.layers[l][p] = 0;
         }
+      }
+      for (i = _n = 0; _n < 16; i = ++_n) {
+        this.state.layers[0][i] = true;
       }
       this.addRandom();
       this.addRandom();
@@ -402,7 +409,7 @@ exports.NotGame = NotGame = (function(_super) {
     str = '';
     for (i = _i = 0; _i < 4; i = ++_i) {
       for (j = _j = 0; _j < 4; j = ++_j) {
-        str += (Math.pow(2, this.value(this.convert(i, j))) & 2046) + (j !== 3 ? '\t' : '');
+        str += this.value(this.convert(i, j)) + (j !== 3 ? '\t' : '');
       }
       str += '\n';
     }
