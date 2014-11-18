@@ -77,6 +77,7 @@ exports.NotGame = class NotGame extends Game
 
   advance: (action) ->
     console.log 'action is ' + action
+    merged = (false for [0...16])
     x = []
     y = []
     for i in [0...4]
@@ -95,7 +96,7 @@ exports.NotGame = class NotGame extends Game
         if val isnt 0
           ret = @getNext(x[i], y[j], action)
           next = ret.next
-          if @value(next) is val
+          if @value(next) is val and not merged[next]
             @state.layers[val + 1][next] = 1
             @state.layers[val][@convert(x[i], y[j])] = 0
             @state.layers[val][next] = 0
@@ -104,15 +105,18 @@ exports.NotGame = class NotGame extends Game
             if val is 10
               terminated = true
               break
+            merged[@convert(x[i], y[j])] = true
           else if x[i] isnt ret.farthest[0] or y[j] isnt ret.farthest[1]
             @state.layers[val][@convert(x[i], y[j])] = 0
             @state.layers[val][@convert(ret.farthest[0], ret.farthest[1])] = 1
             moved = true
+    if moved
+      @addRandom()
+    else
+      reward = -32
     if @lost()
       terminated = true
       reward = -2048
-    if moved
-      @addRandom()
     if terminated
       for l in [0...12]
         for p in [0...16]
@@ -129,6 +133,6 @@ exports.NotGame = class NotGame extends Game
     str = ''
     for i in [0...4]
       for j in [0...4]
-        str += (2 ** @value(@convert(i, j)) & 2046) + (if j isnt 3 then ' ' else '')
+        str += (2 ** @value(@convert(i, j)) & 2046) + (if j isnt 3 then '\t' else '')
       str += '\n'
     return str
