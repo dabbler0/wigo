@@ -1,12 +1,13 @@
 {Agent} = require './agent.coffee'
-{DumbGame} = require './games/dumbGame.coffee'
-{Blackjack} = require './games/blackjack.coffee'
+#{DumbGame} = require './games/dumbGame.coffee'
+#{Blackjack} = require './games/blackjack.coffee'
+{FleeGame} = require './games/flee.coffee'
 
 _zip = (arrays) -> arrays[0].map (_,i) -> arrays.map (a) -> a[i]
 
-game = new Blackjack()#5, 5
+game = new FleeGame 5, 5
 console.log game.state
-agent = new Agent game, game.state.andCombinators(1), {discount: 0.5, forwardMode: 'softmax'}
+agent = new Agent game, game.state.andCombinators(2), {discount: 0.5, forwardMode: 'softmax'}
 score = 0
 move = ->
   score += agent.act()
