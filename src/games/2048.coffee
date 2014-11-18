@@ -38,6 +38,7 @@ exports.NotGame = class NotGame extends Game
     if free.length > 0
       n = free[Math.floor(Math.random() * free.length)]
       @state.layers[if Math.random() > (1 - SPAWN_FOUR_PROBABILITY) then 2 else 1][n] = 1
+      @state.layers[0][n] = 0
 
   # Returns the log base 2 value of a tile at pos
   value: (pos) ->
