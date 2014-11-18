@@ -52,7 +52,7 @@ Agent.fromSerialization = function(game, bases, serialized) {
 };
 
 
-},{"./qLearning.coffee":10}],2:[function(require,module,exports){
+},{"./qLearning.coffee":11}],2:[function(require,module,exports){
 var Agent, helper;
 
 helper = require('./helper.coffee');
@@ -65,11 +65,12 @@ module.exports = {
   DumbGame: require('./games/dumbGame.coffee').DumbGame,
   ChaseGame: require('./games/chase.coffee').ChaseGame,
   Blackjack: require('./games/blackjack.coffee').Blackjack,
+  NotGame: require('./games/2048.coffee').NotGame,
   Agent: Agent
 };
 
 
-},{"./agent.coffee":1,"./games/blackjack.coffee":4,"./games/chase.coffee":5,"./games/dumbGame.coffee":6,"./games/grid.coffee":7,"./games/path.coffee":8,"./helper.coffee":9}],3:[function(require,module,exports){
+},{"./agent.coffee":1,"./games/2048.coffee":4,"./games/blackjack.coffee":5,"./games/chase.coffee":6,"./games/dumbGame.coffee":7,"./games/grid.coffee":8,"./games/path.coffee":9,"./helper.coffee":10}],3:[function(require,module,exports){
 
 /*
 WIGO game definition schema
@@ -215,6 +216,213 @@ exports.Game = Game = (function() {
 
 
 },{}],4:[function(require,module,exports){
+
+/*
+WIGO 2048 game
+Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
+MIT License.
+ */
+var Game, NotGame, SPAWN_FOUR_PROBABILITY,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+Game = require('../game.coffee').Game;
+
+SPAWN_FOUR_PROBABILITY = 0.1;
+
+exports.NotGame = NotGame = (function(_super) {
+  var dirs;
+
+  __extends(NotGame, _super);
+
+  dirs = {
+    0: [0, -1],
+    1: [1, 0],
+    2: [0, 1],
+    3: [-1, 0]
+  };
+
+  function NotGame() {
+    var i, _i;
+    NotGame.__super__.constructor.call(this, 16, 4, 12);
+    for (i = _i = 0; _i < 16; i = ++_i) {
+      this.state.layers[0][i] = true;
+    }
+    this.addRandom();
+    this.addRandom();
+  }
+
+  NotGame.prototype.convert = function(i, j) {
+    return i * 4 + j;
+  };
+
+  NotGame.prototype.addRandom = function() {
+    var free, i, j, n, _i, _j;
+    free = [];
+    for (i = _i = 0; _i < 4; i = ++_i) {
+      for (j = _j = 0; _j < 4; j = ++_j) {
+        if (this.value(this.convert(i, j)) === 0) {
+          free.push(this.convert(i, j));
+        }
+      }
+    }
+    if (free.length > 0) {
+      n = free[Math.floor(Math.random() * free.length)];
+      return this.state.layers[Math.random() > (1 - SPAWN_FOUR_PROBABILITY) ? 2 : 1][n] = 1;
+    }
+  };
+
+  NotGame.prototype.value = function(pos) {
+    var l, _i;
+    for (l = _i = 0; _i < 12; l = ++_i) {
+      if (this.state.layers[l][pos]) {
+        return l;
+      }
+    }
+    return 0;
+  };
+
+  NotGame.prototype.valid = function(x, y) {
+    return x >= 0 && x < 4 && y >= 0 && y < 4;
+  };
+
+  NotGame.prototype.getNext = function(x, y, dir) {
+    var cur, prev;
+    prev = [x, y];
+    cur = [x + dirs[dir][0], y + dirs[dir][1]];
+    while (this.valid(cur[0], cur[1]) && this.value(this.convert(cur[0], cur[1])) === 0) {
+      prev[0] = cur[0];
+      prev[1] = cur[1];
+      cur = [cur[0] + dirs[dir][0], cur[1] + dirs[dir][1]];
+    }
+    return {
+      farthest: prev,
+      next: this.convert(cur[0], cur[1])
+    };
+  };
+
+  NotGame.prototype.lost = function() {
+    var d, i, j, other, val, _i, _j, _k, _l;
+    for (i = _i = 0; _i < 16; i = ++_i) {
+      if (this.value(i) === 0) {
+        return false;
+      }
+    }
+    for (i = _j = 0; _j < 4; i = ++_j) {
+      for (j = _k = 0; _k < 4; j = ++_k) {
+        val = this.value(this.convert(i, j));
+        if (val !== 0) {
+          for (d = _l = 0; _l < 4; d = ++_l) {
+            other = [i + dirs[d][0], j + dirs[d][1]];
+            if (this.valid(other[0], other[1])) {
+              if (this.value(this.convert(other[0], other[1])) === val) {
+                return false;
+              }
+            }
+          }
+        }
+      }
+    }
+    return true;
+  };
+
+  NotGame.prototype.advance = function(action) {
+    var i, j, l, merged, moved, next, p, ret, reward, terminated, val, x, y, _i, _j, _k, _l, _m, _n;
+    console.log('action is ' + action);
+    merged = (function() {
+      var _i, _results;
+      _results = [];
+      for (_i = 0; _i < 16; _i++) {
+        _results.push(false);
+      }
+      return _results;
+    })();
+    x = [];
+    y = [];
+    for (i = _i = 0; _i < 4; i = ++_i) {
+      x.push(i);
+      y.push(i);
+    }
+    if (dirs[action][0] === 1) {
+      x = x.reverse();
+    }
+    if (dirs[action][1] === 1) {
+      y = y.reverse();
+    }
+    reward = 0;
+    moved = false;
+    terminated = false;
+    for (i = _j = 0; _j < 4; i = ++_j) {
+      for (j = _k = 0; _k < 4; j = ++_k) {
+        val = this.value(this.convert(x[i], y[j]));
+        if (val !== 0) {
+          ret = this.getNext(x[i], y[j], action);
+          next = ret.next;
+          if (this.value(next) === val && !merged[next]) {
+            this.state.layers[val + 1][next] = 1;
+            this.state.layers[val][this.convert(x[i], y[j])] = 0;
+            this.state.layers[val][next] = 0;
+            reward += Math.pow(2, val + 1);
+            moved = true;
+            if (val === 10) {
+              terminated = true;
+              break;
+            }
+            merged[this.convert(x[i], y[j])] = true;
+          } else if (x[i] !== ret.farthest[0] || y[j] !== ret.farthest[1]) {
+            this.state.layers[val][this.convert(x[i], y[j])] = 0;
+            this.state.layers[val][this.convert(ret.farthest[0], ret.farthest[1])] = 1;
+            moved = true;
+          }
+        }
+      }
+    }
+    if (moved) {
+      this.addRandom();
+    } else {
+      reward = -32;
+    }
+    if (this.lost()) {
+      terminated = true;
+      reward = -2048;
+    }
+    if (terminated) {
+      for (l = _l = 1; _l < 12; l = ++_l) {
+        for (p = _m = 0; _m < 16; p = ++_m) {
+          this.state.layers[l][p] = 0;
+        }
+      }
+      for (i = _n = 0; _n < 16; i = ++_n) {
+        this.state.layers[0][i] = true;
+      }
+      this.addRandom();
+      this.addRandom();
+    }
+    return {
+      reward: reward,
+      turn: 0,
+      terminated: terminated
+    };
+  };
+
+  NotGame.prototype.render = function() {
+    var i, j, str, _i, _j;
+    str = '';
+    for (i = _i = 0; _i < 4; i = ++_i) {
+      for (j = _j = 0; _j < 4; j = ++_j) {
+        str += this.value(this.convert(i, j)) + (j !== 3 ? '\t' : '');
+      }
+      str += '\n';
+    }
+    return str;
+  };
+
+  return NotGame;
+
+})(Game);
+
+
+},{"../game.coffee":3}],5:[function(require,module,exports){
 
 /*
 WIGO Dumb game
@@ -372,7 +580,7 @@ exports.Blackjack = Blackjack = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":9}],5:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":10}],6:[function(require,module,exports){
 
 /*
 WIGO Dumb game
@@ -578,7 +786,7 @@ exports.ChaseGame = ChaseGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":9}],6:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":10}],7:[function(require,module,exports){
 
 /*
 WIGO Dumb game
@@ -624,7 +832,7 @@ exports.DumbGame = DumbGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":9}],7:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":10}],8:[function(require,module,exports){
 
 /*
 WIGO Dumb game
@@ -819,7 +1027,7 @@ exports.GridGame = GridGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":9}],8:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":10}],9:[function(require,module,exports){
 
 /*
 WIGO Dumb game
@@ -1075,7 +1283,7 @@ exports.PathGame = PathGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":9}],9:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":10}],10:[function(require,module,exports){
 
 /*
 WIGO helper functions.
@@ -1128,7 +1336,7 @@ exports._weightedRandom = function(list) {
 };
 
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 
 /*
 WIGO Q-Learning/SARSA-Learning implementation
@@ -1263,7 +1471,7 @@ QLearner.fromSerialized = function(action, bases, serialization) {
 };
 
 
-},{"./helper.coffee":9,"./regressor.coffee":11}],11:[function(require,module,exports){
+},{"./helper.coffee":10,"./regressor.coffee":12}],12:[function(require,module,exports){
 
 /*
 WIGO stochastic regularized gradient descent linear regression implementation
