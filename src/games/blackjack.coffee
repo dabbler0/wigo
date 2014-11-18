@@ -76,7 +76,7 @@ exports.Blackjack = class Blackjack extends Game
         @reshuffle()
         return {reward: -10, turn: 0}
       ###
-      if @sum(0) > 15
+      if @sum(0) > helper._rand(10) + 10
         @reshuffle()
         return {reward: 1, turn: 0}
       else

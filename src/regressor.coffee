@@ -34,7 +34,45 @@ exports.Regressor = class Regressor
     lambda: @lambda
   }
 
-Regressor.fromSerialized = (bases, serialized) ->
-  k = new Regressor bases, serialized.rate, serialized.lambda
-  k.thetas = serialized.thetas
-  return k
+# # RandomRegressor
+exports.RandomRegressor = class RandomRegressor extends Regressor
+  constructor: (@baseGenerator, @features, @rate = 0.1, @lambda = 0.1, @epsilon = 0.005) ->
+    baseObjs = (@baseGenerator() for [0...@features])
+    @bases = {}
+    for base in baseObjs
+      @bases[base.key] = base.base
+      @thetas[base.key] = 0
+
+    super @bases, @rate, @lambda
+
+  # ## estimate
+  # Get the predicted output for the given input using
+  # basis functions and current thetas
+  estimate: (input) ->
+    output = 0
+    for i, basis of @bases
+      output += @thetas[i] * basis(input)
+    return output
+
+  addBase: ->
+    base = @baseGenerator()
+    @bases[base.key] = base.base
+    @thetas[base.key] = 0
+
+  # ## feed
+  # Given an input/output map, do another gradient descent iteration to improve
+  # thetas.
+  feed: (input, output) ->
+    gradient = @estimate(input) - output
+    for i, basis of @bases
+      @thetas[i] -= @rate * (gradient + @lambda * @thetas[i] / @thetas.length) * basis(input)
+
+    # Prune thetas that are too small
+    sum = 0
+    for i, theta of @thetas
+      sum += theta
+    for i, theta of @thetas
+      if Math.abs(theta / sum) < @epsilon
+        delete @bases[i]
+        delete @thetas[i]
+        @addBase()

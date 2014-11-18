@@ -329,7 +329,7 @@ exports.Blackjack = Blackjack = (function(_super) {
         @reshuffle()
         return {reward: -10, turn: 0}
        */
-      if (this.sum(0) > 15) {
+      if (this.sum(0) > helper._rand(10) + 10) {
         this.reshuffle();
         return {
           reward: 1,

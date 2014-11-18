@@ -10,9 +10,8 @@ helper = require './helper.coffee'
 # # QLearner
 # Linear combination regresssion Q-learning agent
 exports.QLearner = class QLearner
-  constructor: (@actions, @bases, @opts) ->
+  constructor: (@actions, @regressors, @opts) ->
     opts = @opts
-    @rate = opts.rate ? 1
     @discount = opts.discount ? 0.5
     @forwardMode = opts.forwardMode ? 'epsilonGreedy'
 
@@ -25,8 +24,6 @@ exports.QLearner = class QLearner
 
     @rate /= @bases.length
 
-    # Init thetas to zero
-    @regressors = (new Regressor(@bases, @rate) for [0...@actions])
 
   # ## estimate
   # Get linear regression prediction for reward
@@ -90,7 +87,20 @@ exports.QLearner = class QLearner
     opts: @opts
   }
 
-QLearner.fromSerialized = (action, bases, serialization) ->
-  learner = new QLearner action, bases, serialization.opts
-  learner.regressors[i] = Regressor.fromSerialized(k) for k, i in serialization
-  return learner
+# # LinearQLearner
+# A Q learner that does gradient descent linear regression on a fixed
+# set of bases
+exports.LinearQLearner = class LinearQLearner extends QLearner
+  constructor: (@actions, @bases, @opts) ->
+    # Init thetas to zero
+    @rate = opts.rate ? 1
+    super @actions, (new Regressor(@bases, @rate) for [0...@actions]), @opts
+
+# # RandomQLearner
+# A Q learner that does gradient descent linear regression, but
+# cuts features that seem irrelevant, and introduce new ones.
+exports.RandomQLearner = class RandomQLearner extends QLearner
+  constructor: (@actions, @baseGenerator, @opts) ->
+    @rate = opts.rate ? 1
+    @features = opts.features ? 200
+    super @actions, (new RandomRegressor(@bases, @rate, @features) for [0...@actions]), @opts
