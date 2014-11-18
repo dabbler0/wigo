@@ -8,6 +8,7 @@ module.exports = {
   DumbGame: require('./games/dumbGame.coffee').DumbGame
   ChaseGame: require('./games/chase.coffee').ChaseGame
   Blackjack: require('./games/blackjack.coffee').Blackjack
+  NotGame: require('./games/2048.coffee').NotGame
 
   # Agent class
   Agent: Agent

@@ -14,18 +14,43 @@ helper = require '../helper.coffee'
 # you get a point, otherwise you lose a point.
 exports.Blackjack = class Blackjack extends Game
   constructor: ->
-    super 52, 2, 1
+    super 52, 2, 2
     @remainingCards = 52
+    @reshuffle()
 
-  reset: ->
+  reshuffle: ->
     @state.eachBit (i, j) =>
       @state.layers[i][j] = 0
-    @remainingCards = 52
+    @reminaingCards = 0
 
-  getSum: ->
+    # Deal face-up dealer card
+    @dealTo 1
+
+  getValue: (i) -> Math.ceil i / 4
+
+  used: (i) ->
+    for layer in @state.layers
+      if layer[i] is 1
+        return true
+    return false
+
+  deal: ->
+    target = helper._rand @remainingCards
+    j = 0
+    for i in [0...52] when not @used i
+      j++
+      if j is target
+        return j
+    return 52
+
+  dealTo: (layer) ->
+    card = @deal()
+    @state.layers[layer][card] = 1
+
+  sum: (layer) ->
     sum = 0
-    for val, j in @state.layers[0] when val is 1
-      sum += Math.ceil j / 4
+    for i in [0...52] when @state.layers[layer][i] is 1
+      sum += @getValue i
     return sum
 
   advance: (action) ->
@@ -57,4 +82,44 @@ exports.Blackjack = class Blackjack extends Game
     for val,  j in @state.layers[0] when val is 1
       str += Math.ceil(j / 4) + ','
 
+=======
+      @dealTo 0
+      if @sum(0) > 21
+        @reshuffle()
+        return {reward: -1, turn: 0}
+      return {reward: 0, turn: 0}
+
+    else
+      ###
+      until (sum = @sum(1)) > 15
+        @dealTo 1
+
+      if sum > 21
+        @reshuffle()
+        return {reward: 11, turn: 0}
+      else if @sum(0) > sum
+        @reshuffle()
+        return {reward: 11, turn: 0}
+      else
+        @reshuffle()
+        return {reward: -10, turn: 0}
+      ###
+      if @sum(0) > 15
+        @reshuffle()
+        return {reward: 1, turn: 0}
+      else
+        @reshuffle()
+        return {reward: -1, turn: 0}
+
+  _cardNames = 'A 2 3 4 5 6 7 8 9 10 J Q K'.split ' '
+  _suits = '\u2660 \u2665 \u2666 \u2663'.split ' '
+
+  renderCard: (i) -> _cardNames[Math.floor i / 4] + _suits[i % 4]
+
+  render: ->
+    str = ''
+    for layer in [1..0]
+      for i in [0...52] when @state.layers[layer][i] is 1
+        str += @renderCard(i) + ' '
+      str += '\n'
     return str

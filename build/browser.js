@@ -230,94 +230,139 @@ Game = require('../game.coffee').Game;
 helper = require('../helper.coffee');
 
 exports.Blackjack = Blackjack = (function(_super) {
+  var _cardNames, _suits;
+
   __extends(Blackjack, _super);
 
   function Blackjack() {
-    Blackjack.__super__.constructor.call(this, 52, 2, 1);
+    Blackjack.__super__.constructor.call(this, 52, 2, 2);
     this.remainingCards = 52;
+    this.reshuffle();
   }
 
-  Blackjack.prototype.reset = function() {
+  Blackjack.prototype.reshuffle = function() {
     this.state.eachBit((function(_this) {
       return function(i, j) {
         return _this.state.layers[i][j] = 0;
       };
     })(this));
-    return this.remainingCards = 52;
+    this.reminaingCards = 0;
+    return this.dealTo(1);
   };
 
-  Blackjack.prototype.getSum = function() {
-    var j, sum, val, _i, _len, _ref;
+  Blackjack.prototype.getValue = function(i) {
+    return Math.ceil(i / 4);
+  };
+
+  Blackjack.prototype.used = function(i) {
+    var layer, _i, _len, _ref;
+    _ref = this.state.layers;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      layer = _ref[_i];
+      if (layer[i] === 1) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  Blackjack.prototype.deal = function() {
+    var i, j, target, _i;
+    target = helper._rand(this.remainingCards);
+    j = 0;
+    for (i = _i = 0; _i < 52; i = ++_i) {
+      if (!(!this.used(i))) {
+        continue;
+      }
+      j++;
+      if (j === target) {
+        return j;
+      }
+    }
+    return 52;
+  };
+
+  Blackjack.prototype.dealTo = function(layer) {
+    var card;
+    card = this.deal();
+    return this.state.layers[layer][card] = 1;
+  };
+
+  Blackjack.prototype.sum = function(layer) {
+    var i, sum, _i;
     sum = 0;
-    _ref = this.state.layers[0];
-    for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
-      val = _ref[j];
-      if (val === 1) {
-        sum += Math.ceil(j / 4);
+    for (i = _i = 0; _i < 52; i = ++_i) {
+      if (this.state.layers[layer][i] === 1) {
+        sum += this.getValue(i);
       }
     }
     return sum;
   };
 
   Blackjack.prototype.advance = function(action) {
-    var i, j, reward, target, val, _i, _len, _ref;
     if (action === 0) {
-      reward = this.getSum();
-      this.reset();
-      if (reward > 10) {
+      this.dealTo(0);
+      if (this.sum(0) > 21) {
+        this.reshuffle();
+        return {
+          reward: -1,
+          turn: 0
+        };
+      }
+      return {
+        reward: 0,
+        turn: 0
+      };
+    } else {
+
+      /*
+      until (sum = @sum(1)) > 15
+        @dealTo 1
+      
+      if sum > 21
+        @reshuffle()
+        return {reward: 11, turn: 0}
+      else if @sum(0) > sum
+        @reshuffle()
+        return {reward: 11, turn: 0}
+      else
+        @reshuffle()
+        return {reward: -10, turn: 0}
+       */
+      if (this.sum(0) > 15) {
+        this.reshuffle();
         return {
           reward: 1,
-          turn: 0,
-          terminated: true
+          turn: 0
         };
       } else {
+        this.reshuffle();
         return {
           reward: -1,
-          turn: 0,
-          terminated: true
-        };
-      }
-    } else {
-      target = helper._rand(this.remainingCards);
-      i = 0;
-      _ref = this.state.layers[0];
-      for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
-        val = _ref[j];
-        if (val === 0) {
-          if (i === target) {
-            this.state.layers[0][j] = 1;
-            break;
-          } else {
-            i++;
-          }
-        }
-      }
-      if (this.getSum() > 21) {
-        this.reset();
-        return {
-          reward: -1,
-          turn: 0,
-          terminated: true
-        };
-      } else {
-        return {
-          reward: 0,
-          turn: 0,
-          terminated: false
+          turn: 0
         };
       }
     }
   };
 
+  _cardNames = 'A 2 3 4 5 6 7 8 9 10 J Q K'.split(' ');
+
+  _suits = '\u2660 \u2665 \u2666 \u2663'.split(' ');
+
+  Blackjack.prototype.renderCard = function(i) {
+    return _cardNames[Math.floor(i / 4)] + _suits[i % 4];
+  };
+
   Blackjack.prototype.render = function() {
-    var j, str, val, _i, _len, _ref;
+    var i, layer, str, _i, _j;
     str = '';
-    _ref = this.state.layers[0];
-    for (j = _i = 0, _len = _ref.length; _i < _len; j = ++_i) {
-      val = _ref[j];
-      if (val === 1) {
-        str += Math.ceil(j / 4) + ',';
+    for (layer = _i = 1; _i >= 0; layer = --_i) {
+      for (i = _j = 0; _j < 52; i = ++_j) {
+        if (this.state.layers[layer][i] === 1) {
+          str += this.renderCard(i) + ' ';
+        }
       }
+      str += '\n';
     }
     return str;
   };
