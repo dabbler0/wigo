@@ -120,7 +120,9 @@
     'grid': wigo.GridGame,
     'path': wigo.PathGame,
     'chase': wigo.ChaseGame,
-    'blackjack': wigo.Blackjack
+    'flee': wigo.FleeGame,
+    'blackjack': wigo.Blackjack,
+    'snake': wigo.SnakeGame
   };
 
   getGame = function() {

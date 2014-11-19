@@ -3,8 +3,33 @@ Well-Informed Game Operator
 
 This is an implementation of S.A.R.S'.A'.-Learning based on linear regression. It is designed to play, without prior knowledge, any game with discrete inputs and discrete outputs. It learns while playing, so will lose for a while at first, then start winning as it learns to play. For a demo with a bunch of different example games, see here: http://dabbler0.github.io/wigo.
 
-Usage
------
+Notes About the Demo
+--------------------
+The demo features a bunch of config settings for the agent:
+
+Setting      |Recommended Value |Notes
+-------------|------------------|--------
+Bases        |"Degree 2 "and" combinations"; or "Simple linear" for very simple games | The basis functions (see below) to use for linear regression. "Degree 2 'and' combinations" gets `n^2` bases, with the "and" of each combination of two bits; "simple linear" is the set of `n` bases that is literally the input bits.
+Learning Rate|1                 | The normalized "learning rate" for the linreg gradient descent. The actual learning rate (alpha in the gradient descent formula) is computed as `1/n`, where `n` is the number of bases.
+Forward Mode |Softmax           | The SARSA learner needs to have a small probability of doing a non-"optimal" action, so that it can explore and learn about new, possibly better strategies. Softmax does this by doing a probabilistically-weighted selection of actions instead of choosing the best one; epsilon-greedy does this by having a fixed, small probability of choosing a uniformly random action.
+Temperature  |0.1               | The temperature in the softmax computation. Softmax probability weights are proportional to `e^(x/t)` where `x` is the expected reward of the action and `t` is the temperature. Lower temperatures mean lower probabilities of choosing non-"optimal" actions.
+Epsilon      |0.1 (or not set)  | The epsilon in the epsilon-greedy computation. The probability that a uniformly random action is taken, instead of the "optimal" one.
+
+The demo also features a bunch of example games:
+
+Game                 |Notes
+---------------------|--------------
+Treasure Hunt        | A simple game, but with a large set of inputs. The agent is in a 5x5 grid with some walls and a prize that rotates around the four corners, and must learn to get the prize and avoid the walls.
+Simplified Blackjack | Another simple game. Standard 52-card deck. Each turn, the agent can choose to either hit or stay, as in blackjack; if it goes over 21, it loses. If it stays under 21, the dealer is assigned a uniformly random sum between 10 and 21, and if the agent beats the dealer, it wins.
+Chase                | The agent is on a 5x5 grid, and must chase a moving prize. However, the prize always respawns at the same point -- ideally (and in most cases), the agent learns to sit on the spawn point and get lots of points.
+Flee                 | There is one moving enemy, and the agent must learn to avoid it. *This is a complex game, and training can take over half an hour*. However, the agent does learn to avoid pretty well.
+Snake                | The classic arcade game of Snake; the agent must try to make the longest non-self-intersecting snake possible, while avoiding some random walls. *This is a complex game, and training can take over an hour*. However, the agent can also learn to win this.
+2048                 | The popular online numbers game. It's unclear if SARSA learning can successfully solve this game.
+
+At first, the score graph will go down quickly (since most of these games are designed to be lost by a random player). If the agent learns successfully, you will see the graph level out, and, in games where it is possible to win, it will start to rise again.
+
+API Usage
+---------
 WIGO is a Browserify package, so can be included in any number of ways (via browserify, amd, nodejs, or as a browser global).
 
 Example usage with Blackjack:
@@ -56,10 +81,10 @@ class MyGame extends wigo.Game
       2 # Number of layers; usually the number of different types of "pieces"
         # We have two: the player piece and the prize piece(s)
     )
-    
+
     @state.layers[0][0] = 1 # Say that there is a player piece in the 0th square
     @state.layers[1][9] = 1 # Say that there is a prize piece in the 9th square
-    
+
     @currentPlayerPosition = 0
 
   advance: (action) -> # Action will be guaranteed to be in the range [0...n], where n is the number of actions
@@ -74,13 +99,13 @@ class MyGame extends wigo.Game
         @state.layers[0][@currentPlayerPosition] = 0
         @currentPlayerPosition++
         @state.layers[0][@currentPlayerPosition] = 1
-    
+
     reward = 0
-    
+
     # Check to see if there is a prize piece on our current location
     if @state.layers[1][@currentPlayerPosition] is 1
       reward = 1
-    
+
     return {
       reward: reward # What was the reward for that action?
       turn: 0 # Whose turn is it (in this case, we are a one player game, so always 0)

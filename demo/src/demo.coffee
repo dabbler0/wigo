@@ -83,7 +83,9 @@ games = {
   'grid': wigo.GridGame
   'path': wigo.PathGame
   'chase': wigo.ChaseGame
+  'flee': wigo.FleeGame
   'blackjack': wigo.Blackjack
+  'snake': wigo.SnakeGame
 }
 getGame = -> games[gameSelector.value]
 

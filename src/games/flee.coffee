@@ -16,8 +16,8 @@ exports.FleeGame = class FleeGame extends Game
     super @w * @h, 4, 2
 
     # Place random walls
-    for i in @_corners() when i isnt 0
-      @state.layers[1][i] = 1
+    #for i in @_corners() when i isnt 0
+    @state.layers[1][@w - 1] = 1
 
     # Place player
     @state.layers[0][0] = 1
@@ -115,10 +115,7 @@ exports.FleeGame = class FleeGame extends Game
         i = y * @w + x
 
         # Draw underlying terrain
-        if @state.layers[1][i] is 1
-          ctx.fillStyle = '#F00'
-        else
-          ctx.fillStyle = '#FFF'
+        ctx.fillStyle = '#FFF'
         ctx.fillRect cx, cy, fx, fy
 
         # Draw the player
@@ -126,7 +123,7 @@ exports.FleeGame = class FleeGame extends Game
           ctx.fillStyle = '#000'
           ctx.fillRect cx + fx / 3, cy + fy / 3, fx / 3, fy / 3
 
-        # Draw the prize
-        if @state.layers[2][i] is 1
-          ctx.fillStyle = '#FF0'
+        # Draw the enemy
+        if @state.layers[1][i] is 1
+          ctx.fillStyle = '#F00'
           ctx.fillRect cx + fx / 3, cy + fy / 3, fx / 3, fy / 3
