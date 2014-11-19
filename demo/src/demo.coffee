@@ -82,6 +82,7 @@ gameSelector = document.querySelector '#game'
 games = {
   'grid': wigo.GridGame
   'chase': wigo.ChaseGame
+  'chased': wigo.ChasedGame
   'flee': wigo.FleeGame
   'blackjack': wigo.Blackjack
   'snake': wigo.SnakeGame
