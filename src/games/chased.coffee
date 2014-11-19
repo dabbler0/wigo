@@ -74,7 +74,7 @@ exports.Chased = class Chased extends Game
       chaserCoord.y += dir.y
     if 0 <= chaserCoord.x < @w and 0 <= chaserCoord.y < @h
       @state.layers[1][oldIndex] = 0
-      @state.layers[1][@_index(prizeCoord)] = 1
+      @state.layers[1][@_index(chaserCoord)] = 1
 
     # Move the player
     @state.layers[0][@_index(coord)] = 0
