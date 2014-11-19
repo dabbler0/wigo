@@ -57,7 +57,7 @@ The agent will learn by estimating a function approximator based on a linear com
 bases[0](state) * thetas[0] + bases[1](state) * thetas[1] ...
 ```
 
-Some simple basis function generatirs that are provided in the WIGO package:
+Some simple basis function generators that are provided in the WIGO package:
 ```coffeescript
 game.state.andCombinators(n) # Return a set of basis functions that are every possible set of `n` bits,
                              # "and"ed together. Returns (|state| choose n) functions.
