@@ -58,7 +58,7 @@ exports.Blackjack = class Blackjack extends Game
       @dealTo 0
       if @sum(0) > 21
         @reshuffle()
-        return {reward: -1, turn: 0}
+        return {reward: -1, turn: 0, terminated: true}
       return {reward: 0, turn: 0}
 
     else
@@ -78,10 +78,10 @@ exports.Blackjack = class Blackjack extends Game
       ###
       if @sum(0) > 15
         @reshuffle()
-        return {reward: 1, turn: 0}
+        return {reward: 1, turn: 0, terminated: true}
       else
         @reshuffle()
-        return {reward: -1, turn: 0}
+        return {reward: -1, turn: 0, terminated: true}
 
   _cardNames = 'A 2 3 4 5 6 7 8 9 10 J Q K'.split ' '
   _suits = '\u2660 \u2665 \u2666 \u2663'.split ' '
