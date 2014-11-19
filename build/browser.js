@@ -44,15 +44,11 @@ exports.Agent = Agent = (function() {
 
 })();
 
-Agent.fromSerialization = function(game, bases, serialized) {
-  var agent;
-  agent = new Agent(game, bases);
-  agent.learner = QLearner.fromSerialization(serialized);
-  return agent;
-};
 
+},{"./qLearning.coffee":12}],2:[function(require,module,exports){
 
-},{"./qLearning.coffee":13}],2:[function(require,module,exports){
+/*
+ */
 var Agent, helper;
 
 helper = require('./helper.coffee');
@@ -60,18 +56,19 @@ helper = require('./helper.coffee');
 Agent = require('./agent.coffee').Agent;
 
 module.exports = {
-  PathGame: require('./games/path.coffee').PathGame,
   GridGame: require('./games/grid.coffee').GridGame,
   DumbGame: require('./games/dumbGame.coffee').DumbGame,
   ChaseGame: require('./games/chase.coffee').ChaseGame,
+  Blackjack: require('./games/blackjack.coffee').Blackjack,
   NotGame: require('./games/2048.coffee').NotGame,
+  ChasedGame: require('./games/chase.coffee').ChasedGame,
   FleeGame: require('./games/flee.coffee').FleeGame,
   SnakeGame: require('./games/snake.coffee').SnakeGame,
   Agent: Agent
 };
 
 
-},{"./agent.coffee":1,"./games/2048.coffee":4,"./games/blackjack.coffee":5,"./games/chase.coffee":6,"./games/dumbGame.coffee":7,"./games/flee.coffee":8,"./games/grid.coffee":9,"./games/path.coffee":10,"./games/snake.coffee":11,"./helper.coffee":12}],3:[function(require,module,exports){
+},{"./agent.coffee":1,"./games/2048.coffee":4,"./games/blackjack.coffee":5,"./games/chase.coffee":6,"./games/dumbGame.coffee":7,"./games/flee.coffee":8,"./games/grid.coffee":9,"./games/snake.coffee":10,"./helper.coffee":11}],3:[function(require,module,exports){
 
 /*
 WIGO game definition schema
@@ -219,7 +216,7 @@ exports.Game = Game = (function() {
 },{}],4:[function(require,module,exports){
 
 /*
-WIGO 2048 game
+WIGO 2048 Game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
  */
@@ -427,7 +424,7 @@ exports.NotGame = NotGame = (function(_super) {
 },{"../game.coffee":3}],5:[function(require,module,exports){
 
 /*
-WIGO Dumb game
+WGO Simplified Blackjack Game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
  */
@@ -445,7 +442,7 @@ exports.Blackjack = Blackjack = (function(_super) {
   __extends(Blackjack, _super);
 
   function Blackjack() {
-    Blackjack.__super__.constructor.call(this, 52, 2, 2);
+    Blackjack.__super__.constructor.call(this, 52, 2, 1);
     this.remainingCards = 52;
     this.reshuffle();
   }
@@ -456,8 +453,7 @@ exports.Blackjack = Blackjack = (function(_super) {
         return _this.state.layers[i][j] = 0;
       };
     })(this));
-    this.reminaingCards = 0;
-    return this.dealTo(1);
+    return this.reminaingCards = 0;
   };
 
   Blackjack.prototype.getValue = function(i) {
@@ -525,22 +521,7 @@ exports.Blackjack = Blackjack = (function(_super) {
         turn: 0
       };
     } else {
-
-      /*
-      until (sum = @sum(1)) > 15
-        @dealTo 1
-      
-      if sum > 21
-        @reshuffle()
-        return {reward: 11, turn: 0}
-      else if @sum(0) > sum
-        @reshuffle()
-        return {reward: 11, turn: 0}
-      else
-        @reshuffle()
-        return {reward: -10, turn: 0}
-       */
-      if (this.sum(0) > 15) {
+      if (this.sum(0) > 10 + helper._rand(11)) {
         this.reshuffle();
         return {
           reward: 1,
@@ -567,16 +548,14 @@ exports.Blackjack = Blackjack = (function(_super) {
   };
 
   Blackjack.prototype.render = function() {
-    var i, layer, str, _i, _j;
+    var i, str, _i;
     str = '';
-    for (layer = _i = 1; _i >= 0; layer = --_i) {
-      for (i = _j = 0; _j < 52; i = ++_j) {
-        if (this.state.layers[layer][i] === 1) {
-          str += this.renderCard(i) + ' ';
-        }
+    for (i = _i = 0; _i < 52; i = ++_i) {
+      if (this.state.layers[0][i] === 1) {
+        str += this.renderCard(i) + ' ';
       }
-      str += '\n';
     }
+    str += '\n';
     return str;
   };
 
@@ -585,10 +564,10 @@ exports.Blackjack = Blackjack = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":12}],6:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":11}],6:[function(require,module,exports){
 
 /*
-WIGO Dumb game
+WIGO Chase Game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
  */
@@ -791,10 +770,10 @@ exports.ChaseGame = ChaseGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":12}],7:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":11}],7:[function(require,module,exports){
 
 /*
-WIGO Dumb game
+WIGO Dumb Game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
  */
@@ -837,10 +816,10 @@ exports.DumbGame = DumbGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":12}],8:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":11}],8:[function(require,module,exports){
 
 /*
-WIGO Dumb game
+WIGO Flee Game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
  */
@@ -1035,14 +1014,14 @@ exports.FleeGame = FleeGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":12}],9:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":11}],9:[function(require,module,exports){
 
 /*
-WIGO Dumb game
+WIGO Grid Game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
  */
-var Game, GridGame, PRIZE_SPAWN_PROBABILITY, WALL_DENSITY, helper,
+var Game, GridGame, WALL_DENSITY, helper,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
@@ -1051,8 +1030,6 @@ var Game, GridGame, PRIZE_SPAWN_PROBABILITY, WALL_DENSITY, helper,
 Game = require('../game.coffee').Game;
 
 helper = require('../helper.coffee');
-
-PRIZE_SPAWN_PROBABILITY = 0.05;
 
 WALL_DENSITY = 0.2;
 
@@ -1230,278 +1207,20 @@ exports.GridGame = GridGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":12}],10:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":11}],10:[function(require,module,exports){
 
 /*
-WIGO Dumb game
+WIGO Snake Game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
  */
-var Game, PRIZE_SPAWN_PROBABILITY, PathGame, WALL_DENSITY, helper,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-Game = require('../game.coffee').Game;
-
-helper = require('../helper.coffee');
-
-PRIZE_SPAWN_PROBABILITY = 0.05;
-
-WALL_DENSITY = 1;
-
-exports.PathGame = PathGame = (function(_super) {
-  var _dirs;
-
-  __extends(PathGame, _super);
-
-  function PathGame(w, h) {
-    this.w = w != null ? w : 5;
-    this.h = h != null ? h : 5;
-    PathGame.__super__.constructor.call(this, this.w * this.h, 4, 3);
-    this.buildMap();
-    this.reset();
-  }
-
-  PathGame.prototype.playerReplace = function() {
-    var i, _i, _ref;
-    for (i = _i = 0, _ref = this.w * this.h; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      this.state.layers[0][i] = 0;
-    }
-    return this.state.layers[0][0] = 1;
-  };
-
-  PathGame.prototype.reset = function() {
-    this.timeSinceReset = 0;
-    this.buildMap();
-    return this.playerReplace();
-  };
-
-  PathGame.prototype.buildMap = function() {
-    var digger, dir, i, _i, _j, _ref, _ref1, _ref2, _ref3, _results;
-    this.state.eachBit((function(_this) {
-      return function(i, j) {
-        return _this.state.layers[i][j] = 0;
-      };
-    })(this));
-    for (i = _i = 0, _ref = this.w * this.h; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      if (__indexOf.call(this._corners(), i) < 0) {
-        if (Math.random() < WALL_DENSITY) {
-          this.state.layers[1][i] = 1;
-        }
-      }
-    }
-    digger = {
-      x: 0,
-      y: 0
-    };
-    while (!(digger.x === this.w - 1 && digger.y === this.h - 1)) {
-      dir = _dirs[helper._rand(2)];
-      digger.x += dir.x;
-      digger.y += dir.y;
-      if ((0 <= (_ref1 = digger.x) && _ref1 < this.w) && (0 <= (_ref2 = digger.y) && _ref2 < this.h)) {
-        this.state.layers[1][this._index(digger)] = 0;
-      } else {
-        digger.x -= dir.x;
-        digger.y -= dir.y;
-      }
-    }
-    this.state.layers[1][this._index(digger)] = 0;
-    _results = [];
-    for (i = _j = 0, _ref3 = this.w * this.h; 0 <= _ref3 ? _j < _ref3 : _j > _ref3; i = 0 <= _ref3 ? ++_j : --_j) {
-      if (this.state.layers[1][i] === 0) {
-        _results.push(this.state.layers[2][i] = 1);
-      }
-    }
-    return _results;
-  };
-
-  PathGame.prototype._coord = function(index) {
-    return {
-      x: index % this.w,
-      y: (index - (index % this.w)) / this.w
-    };
-  };
-
-  PathGame.prototype._index = function(coord) {
-    return coord.x + coord.y * this.w;
-  };
-
-  PathGame.prototype._corners = function() {
-    return [
-      this._index({
-        x: 0,
-        y: 0
-      }), this._index({
-        x: 0,
-        y: this.h - 1
-      }), this._index({
-        x: this.w - 1,
-        y: 0
-      }), this._index({
-        x: this.w - 1,
-        y: this.h - 1
-      })
-    ];
-  };
-
-  _dirs = {
-    0: {
-      x: 0,
-      y: 1
-    },
-    1: {
-      x: 1,
-      y: 0
-    },
-    2: {
-      x: 0,
-      y: -1
-    },
-    3: {
-      x: -1,
-      y: 0
-    }
-  };
-
-  PathGame.prototype.advance = function(action) {
-    var coord, dir, finish, i, newCoord, prize, _i, _ref, _ref1, _ref2;
-    this.timeSinceReset++;
-    dir = _dirs[action];
-    coord = null;
-    for (i = _i = 0, _ref = this.w * this.h; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      if (this.state.layers[0][i] === 1) {
-        coord = this._coord(i);
-        break;
-      }
-    }
-    newCoord = {
-      x: coord.x + dir.x,
-      y: coord.y + dir.y
-    };
-    if (!((0 <= (_ref1 = newCoord.x) && _ref1 < this.w)) || !((0 <= (_ref2 = newCoord.y) && _ref2 < this.h))) {
-      this.playerReplace();
-      return {
-        reward: -1,
-        turn: 0
-      };
-    }
-    this.state.layers[0][this._index(coord)] = 0;
-    this.state.layers[0][this._index(newCoord)] = 1;
-    prize = false;
-    finish = false;
-    if (this.state.layers[2][this._index(newCoord)] === 1) {
-      prize = true;
-      this.state.layers[2][this._index(newCoord)] = 0;
-    }
-    if (newCoord.x === this.w - 1 && newCoord.y === this.h - 1) {
-      finish = true;
-      this.reset();
-    }
-    if (this.timeSinceReset > 300) {
-      this.reset();
-      return {
-        reward: -5,
-        turn: 0
-      };
-    }
-    if (finish) {
-      return {
-        reward: 50,
-        turn: 0
-      };
-    } else if (prize) {
-      return {
-        reward: 10,
-        turn: 0
-      };
-    } else if (this.state.layers[1][this._index(newCoord)] === 1) {
-      this.playerReplace();
-      return {
-        reward: -1,
-        turn: 0
-      };
-    } else {
-      return {
-        reward: 0,
-        turn: 0
-      };
-    }
-  };
-
-  PathGame.prototype.render = function() {
-    var i, j, str, _i, _j, _ref, _ref1;
-    str = '';
-    for (j = _i = 0, _ref = this.h; 0 <= _ref ? _i < _ref : _i > _ref; j = 0 <= _ref ? ++_i : --_i) {
-      for (i = _j = 0, _ref1 = this.w; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-        if (this.state.layers[0][j * this.w + i] === 1) {
-          str += '@';
-        } else if (this.state.layers[1][j * this.w + i] === 1) {
-          str += '~';
-        } else {
-          str += ' ';
-        }
-      }
-      str += '\n';
-    }
-    return str;
-  };
-
-  PathGame.prototype.renderCanvas = function(ctx, canvas) {
-    var cx, cy, fx, fy, i, x, y, _i, _ref, _results;
-    fx = canvas.width / this.w;
-    fy = canvas.height / this.h;
-    _results = [];
-    for (y = _i = 0, _ref = this.h; 0 <= _ref ? _i < _ref : _i > _ref; y = 0 <= _ref ? ++_i : --_i) {
-      _results.push((function() {
-        var _j, _ref1, _results1;
-        _results1 = [];
-        for (x = _j = 0, _ref1 = this.w; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; x = 0 <= _ref1 ? ++_j : --_j) {
-          cx = x * fx;
-          cy = y * fy;
-          i = y * this.w + x;
-          if (this.state.layers[1][i] === 1) {
-            ctx.fillStyle = '#F00';
-          } else if (this.state.layers[2][i] === 1) {
-            ctx.fillStyle = '#FF0';
-          } else {
-            ctx.fillStyle = '#DEB877';
-          }
-          ctx.fillRect(cx, cy, fx, fy);
-          if (this.state.layers[0][i] === 1) {
-            ctx.fillStyle = '#000';
-            _results1.push(ctx.fillRect(cx + fx / 3, cy + fy / 3, fx / 3, fy / 3));
-          } else {
-            _results1.push(void 0);
-          }
-        }
-        return _results1;
-      }).call(this));
-    }
-    return _results;
-  };
-
-  return PathGame;
-
-})(Game);
-
-
-},{"../game.coffee":3,"../helper.coffee":12}],11:[function(require,module,exports){
-
-/*
-WIGO Dumb game
-Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
-MIT License.
- */
-var Game, PRIZE_SPAWN_PROBABILITY, SnakeGame, helper,
+var Game, SnakeGame, helper,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Game = require('../game.coffee').Game;
 
 helper = require('../helper.coffee');
-
-PRIZE_SPAWN_PROBABILITY = 0.05;
 
 exports.SnakeGame = SnakeGame = (function(_super) {
   var _dirs;
@@ -1523,8 +1242,7 @@ exports.SnakeGame = SnakeGame = (function(_super) {
     })(this));
     this.state.layers[1][helper._rand(this.w * this.h - 1) + 1] = 1;
     this.state.layers[1][helper._rand(this.w * this.h - 1) + 1] = 1;
-    this.state.layers[0][0] = 1;
-    return this.prizeIndex = 0;
+    return this.state.layers[0][0] = 1;
   };
 
   SnakeGame.prototype._coord = function(index) {
@@ -1657,11 +1375,12 @@ exports.SnakeGame = SnakeGame = (function(_super) {
 })(Game);
 
 
-},{"../game.coffee":3,"../helper.coffee":12}],12:[function(require,module,exports){
+},{"../game.coffee":3,"../helper.coffee":11}],11:[function(require,module,exports){
 
 /*
 WIGO helper functions.
-Public domain.
+Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
+MIT License.
  */
 var _pow, _rand, _randBit, _sum;
 
@@ -1674,11 +1393,7 @@ exports._rand = _rand = function(x) {
 };
 
 exports._randBit = _randBit = function() {
-  if (Math.random() < 0.5) {
-    return 1;
-  } else {
-    return 0;
-  }
+  return _rand(2);
 };
 
 exports._pow = _pow = function(x) {
@@ -1710,7 +1425,7 @@ exports._weightedRandom = function(list) {
 };
 
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 
 /*
 WIGO Q-Learning/SARSA-Learning implementation
@@ -1834,18 +1549,8 @@ exports.QLearner = QLearner = (function() {
 
 })();
 
-QLearner.fromSerialized = function(action, bases, serialization) {
-  var i, k, learner, _i, _len;
-  learner = new QLearner(action, bases, serialization.opts);
-  for (i = _i = 0, _len = serialization.length; _i < _len; i = ++_i) {
-    k = serialization[i];
-    learner.regressors[i] = Regressor.fromSerialized(k);
-  }
-  return learner;
-};
 
-
-},{"./helper.coffee":12,"./regressor.coffee":14}],14:[function(require,module,exports){
+},{"./helper.coffee":11,"./regressor.coffee":13}],13:[function(require,module,exports){
 
 /*
 WIGO stochastic regularized gradient descent linear regression implementation
@@ -1906,13 +1611,6 @@ exports.Regressor = Regressor = (function() {
   return Regressor;
 
 })();
-
-Regressor.fromSerialized = function(bases, serialized) {
-  var k;
-  k = new Regressor(bases, serialized.rate, serialized.lambda);
-  k.thetas = serialized.thetas;
-  return k;
-};
 
 
 },{}]},{},[2])(2)

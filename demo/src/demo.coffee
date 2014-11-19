@@ -86,6 +86,7 @@ games = {
   'flee': wigo.FleeGame
   'blackjack': wigo.Blackjack
   'snake': wigo.SnakeGame
+  '2048': wigo.GameNot
 }
 getGame = -> games[gameSelector.value]
 

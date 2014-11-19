@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>#</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="2048.html">
+                2048.coffee
+              </a>
+            
+              
+              <a class="source" href="blackjack.html">
+                blackjack.coffee
+              </a>
+            
+              
+              <a class="source" href="chase.html">
+                chase.coffee
+              </a>
+            
+              
+              <a class="source" href="chased.html">
+                chased.coffee
+              </a>
+            
+              
+              <a class="source" href="dumbGame.html">
+                dumbGame.coffee
+              </a>
+            
+              
+              <a class="source" href="flee.html">
+                flee.coffee
+              </a>
+            
+              
+              <a class="source" href="grid.html">
+                grid.coffee
+              </a>
+            
+              
+              <a class="source" href="path.html">
+                path.coffee
+              </a>
+            
+              
+              <a class="source" href="snake.html">
+                snake.coffee
+              </a>
+            
+              
+              <a class="source" href="ticTacToe.html">
+                ticTacToe.coffee
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h1 id="-">#</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>WIGO <span class="hljs-number">2048</span> Game
+Copyright (c) <span class="hljs-number">2014</span> Anthony Bau, Weihang Fan, Calvin Luo, <span class="hljs-keyword">and</span> Steven Price
+MIT License.</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h1 id="-">#</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>{Game} = <span class="hljs-built_in">require</span> <span class="hljs-string">'../game.coffee'</span>
+
+SPAWN_FOUR_PROBABILITY = <span class="hljs-number">0.1</span>
+
+exports.NotGame = <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NotGame</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Game</span></span>
+  
+  dirs = {
+    <span class="hljs-number">0</span>: [<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>] <span class="hljs-comment"># Left</span>
+    <span class="hljs-number">1</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>] <span class="hljs-comment"># Down</span>
+    <span class="hljs-number">2</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>] <span class="hljs-comment"># Right</span>
+    <span class="hljs-number">3</span>: [-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>] <span class="hljs-comment"># Up</span>
+  }
+
+  <span class="hljs-attribute">constructor</span>: <span class="hljs-function">-&gt;</span>
+    <span class="hljs-keyword">super</span> <span class="hljs-number">16</span>, <span class="hljs-number">4</span>, <span class="hljs-number">12</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.16</span>]
+      <span class="hljs-property">@state</span>.layers[<span class="hljs-number">0</span>][i] = <span class="hljs-literal">true</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Add two random initial tiles</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@addRandom</span>()
+    <span class="hljs-property">@addRandom</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Convert coordinates to index in state</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">convert</span>: <span class="hljs-function"><span class="hljs-params">(i, j)</span> -&gt;</span>
+    <span class="hljs-keyword">return</span> i * <span class="hljs-number">4</span> + j</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Add a random tile</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">addRandom</span>: <span class="hljs-function">-&gt;</span>
+    free = []
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.4</span>]
+      <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.4</span>]
+        <span class="hljs-keyword">if</span> <span class="hljs-property">@value</span>(<span class="hljs-property">@convert</span>(i, j)) <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
+          free.push <span class="hljs-property">@convert</span>(i, j)
+    <span class="hljs-keyword">if</span> free.length &gt; <span class="hljs-number">0</span>
+      n = free[Math.floor(Math.random() * free.length)]
+      <span class="hljs-property">@state</span>.layers[<span class="hljs-keyword">if</span> Math.random() &gt; (<span class="hljs-number">1</span> - SPAWN_FOUR_PROBABILITY) <span class="hljs-keyword">then</span> <span class="hljs-number">2</span> <span class="hljs-keyword">else</span> <span class="hljs-number">1</span>][n] = <span class="hljs-number">1</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Returns the log base 2 value of a tile at pos</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">value</span>: <span class="hljs-function"><span class="hljs-params">(pos)</span> -&gt;</span>
+    <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.12</span>]
+      <span class="hljs-keyword">if</span> <span class="hljs-property">@state</span>.layers[l][pos]
+        <span class="hljs-keyword">return</span> l
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Determine whether a coordinate is valid</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">valid</span>: <span class="hljs-function"><span class="hljs-params">(x, y)</span> -&gt;</span>
+    <span class="hljs-keyword">return</span> x &gt;= <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> x &lt; <span class="hljs-number">4</span> <span class="hljs-keyword">and</span> y &gt;= <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> y &lt; <span class="hljs-number">4</span>
+
+  <span class="hljs-attribute">getNext</span>: <span class="hljs-function"><span class="hljs-params">(x, y, dir)</span> -&gt;</span>
+    prev = [x, y]
+    cur = [x + dirs[dir][<span class="hljs-number">0</span>], y + dirs[dir][<span class="hljs-number">1</span>]]
+    <span class="hljs-keyword">while</span> <span class="hljs-property">@valid</span>(cur[<span class="hljs-number">0</span>], cur[<span class="hljs-number">1</span>]) <span class="hljs-keyword">and</span> <span class="hljs-property">@value</span>(<span class="hljs-property">@convert</span>(cur[<span class="hljs-number">0</span>], cur[<span class="hljs-number">1</span>])) <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
+      prev[<span class="hljs-number">0</span>] = cur[<span class="hljs-number">0</span>]
+      prev[<span class="hljs-number">1</span>] = cur[<span class="hljs-number">1</span>]
+      cur = [cur[<span class="hljs-number">0</span>] + dirs[dir][<span class="hljs-number">0</span>], cur[<span class="hljs-number">1</span>] + dirs[dir][<span class="hljs-number">1</span>]]
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attribute">farthest</span>: prev
+      <span class="hljs-attribute">next</span>: <span class="hljs-property">@convert</span>(cur[<span class="hljs-number">0</span>], cur[<span class="hljs-number">1</span>])
+    }
+  
+  <span class="hljs-attribute">lost</span>: <span class="hljs-function">-&gt;</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.16</span>]
+      <span class="hljs-keyword">if</span> <span class="hljs-property">@value</span>(i) <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.4</span>]
+      <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.4</span>]
+        val = <span class="hljs-property">@value</span>(<span class="hljs-property">@convert</span>(i, j))
+        <span class="hljs-keyword">if</span> val <span class="hljs-keyword">isnt</span> <span class="hljs-number">0</span>
+          <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.4</span>]
+            other = [i + dirs[d][<span class="hljs-number">0</span>], j + dirs[d][<span class="hljs-number">1</span>]]
+            <span class="hljs-keyword">if</span> <span class="hljs-property">@valid</span>(other[<span class="hljs-number">0</span>], other[<span class="hljs-number">1</span>])
+              <span class="hljs-keyword">if</span> <span class="hljs-property">@value</span>(<span class="hljs-property">@convert</span>(other[<span class="hljs-number">0</span>], other[<span class="hljs-number">1</span>])) <span class="hljs-keyword">is</span> val
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+
+  <span class="hljs-attribute">advance</span>: <span class="hljs-function"><span class="hljs-params">(action)</span> -&gt;</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">'action is '</span> + action
+    merged = (<span class="hljs-literal">false</span> <span class="hljs-keyword">for</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.16</span>])
+    x = []
+    y = []
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.4</span>]
+      x.push i
+      y.push i
+    <span class="hljs-keyword">if</span> dirs[action][<span class="hljs-number">0</span>] <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
+      x = x.reverse()
+    <span class="hljs-keyword">if</span> dirs[action][<span class="hljs-number">1</span>] <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
+      y = y.reverse()
+    reward = <span class="hljs-number">0</span>
+    moved = <span class="hljs-literal">false</span>
+    terminated = <span class="hljs-literal">false</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.4</span>]
+      <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.4</span>]
+        val = <span class="hljs-property">@value</span>(<span class="hljs-property">@convert</span>(x[i], y[j]))
+        <span class="hljs-keyword">if</span> val <span class="hljs-keyword">isnt</span> <span class="hljs-number">0</span>
+          ret = <span class="hljs-property">@getNext</span>(x[i], y[j], action)
+          next = ret.next
+          <span class="hljs-keyword">if</span> <span class="hljs-property">@value</span>(next) <span class="hljs-keyword">is</span> val <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> merged[next]
+            <span class="hljs-property">@state</span>.layers[val + <span class="hljs-number">1</span>][next] = <span class="hljs-number">1</span>
+            <span class="hljs-property">@state</span>.layers[val][<span class="hljs-property">@convert</span>(x[i], y[j])] = <span class="hljs-number">0</span>
+            <span class="hljs-property">@state</span>.layers[val][next] = <span class="hljs-number">0</span>
+            reward += <span class="hljs-number">2</span> ** (val + <span class="hljs-number">1</span>)
+            moved = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">if</span> val <span class="hljs-keyword">is</span> <span class="hljs-number">10</span>
+              terminated = <span class="hljs-literal">true</span>
+              <span class="hljs-keyword">break</span>
+            merged[<span class="hljs-property">@convert</span>(x[i], y[j])] = <span class="hljs-literal">true</span>
+          <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> x[i] <span class="hljs-keyword">isnt</span> ret.farthest[<span class="hljs-number">0</span>] <span class="hljs-keyword">or</span> y[j] <span class="hljs-keyword">isnt</span> ret.farthest[<span class="hljs-number">1</span>]
+            <span class="hljs-property">@state</span>.layers[val][<span class="hljs-property">@convert</span>(x[i], y[j])] = <span class="hljs-number">0</span>
+            <span class="hljs-property">@state</span>.layers[val][<span class="hljs-property">@convert</span>(ret.farthest[<span class="hljs-number">0</span>], ret.farthest[<span class="hljs-number">1</span>])] = <span class="hljs-number">1</span>
+            moved = <span class="hljs-literal">true</span>
+    <span class="hljs-keyword">if</span> moved
+      <span class="hljs-property">@addRandom</span>()
+    <span class="hljs-keyword">else</span>
+      reward = -<span class="hljs-number">32</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-property">@lost</span>()
+      terminated = <span class="hljs-literal">true</span>
+      reward = -<span class="hljs-number">2048</span>
+    <span class="hljs-keyword">if</span> terminated
+      <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> [<span class="hljs-number">1.</span>.<span class="hljs-number">.12</span>]
+        <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.16</span>]
+          <span class="hljs-property">@state</span>.layers[l][p] = <span class="hljs-number">0</span>
+      <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.16</span>]
+        <span class="hljs-property">@state</span>.layers[<span class="hljs-number">0</span>][i] = <span class="hljs-literal">true</span>
+      <span class="hljs-property">@addRandom</span>()
+      <span class="hljs-property">@addRandom</span>()
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attribute">reward</span>: reward
+      <span class="hljs-attribute">turn</span>: <span class="hljs-number">0</span>
+      <span class="hljs-attribute">terminated</span>: terminated
+    }
+
+  <span class="hljs-attribute">render</span>: <span class="hljs-function">-&gt;</span>
+    str = <span class="hljs-string">''</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.4</span>]
+      <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">.4</span>]
+        str += <span class="hljs-property">@value</span>(<span class="hljs-property">@convert</span>(i, j)) + (<span class="hljs-keyword">if</span> j <span class="hljs-keyword">isnt</span> <span class="hljs-number">3</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'\t'</span> <span class="hljs-keyword">else</span> <span class="hljs-string">''</span>)
+      str += <span class="hljs-string">'\n'</span>
+    <span class="hljs-keyword">return</span> str</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

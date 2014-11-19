@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>#</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="agent.html">
+                agent.coffee
+              </a>
+            
+              
+              <a class="source" href="browser.html">
+                browser.coffee
+              </a>
+            
+              
+              <a class="source" href="game.html">
+                game.coffee
+              </a>
+            
+              
+              <a class="source" href="helper.html">
+                helper.coffee
+              </a>
+            
+              
+              <a class="source" href="play.html">
+                play.coffee
+              </a>
+            
+              
+              <a class="source" href="qLearning.html">
+                qLearning.coffee
+              </a>
+            
+              
+              <a class="source" href="regressor.html">
+                regressor.coffee
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h1 id="-">#</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>WIGO Q-Learning/SARSA-Learning implementation
+Copyright (c) <span class="hljs-number">2014</span> Anthony Bau, Weihang Fan, Calvin Luo, <span class="hljs-keyword">and</span> Steven Price
+MIT License.</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h1 id="-">#</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+helper = <span class="hljs-built_in">require</span> <span class="hljs-string">'./helper.coffee'</span>
+{Regressor} = <span class="hljs-built_in">require</span> <span class="hljs-string">'./regressor.coffee'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <h1 id="qlearner">QLearner</h1>
+<p>Linear combination regresssion Q-learning agent</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.QLearner = <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QLearner</span></span>
+  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(<span class="hljs-property">@actions</span>, <span class="hljs-property">@bases</span>, <span class="hljs-property">@opts</span>)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Fill in option defaults</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    opts = <span class="hljs-property">@opts</span>
+    <span class="hljs-property">@rate</span> = opts.rate ? <span class="hljs-number">1</span>
+    <span class="hljs-property">@discount</span> = opts.discount ? <span class="hljs-number">0.5</span>
+    <span class="hljs-property">@forwardMode</span> = opts.forwardMode ? <span class="hljs-string">'epsilonGreedy'</span>
+
+    <span class="hljs-property">@epsilon</span> = opts.epsilon ? <span class="hljs-number">0.1</span>
+
+    <span class="hljs-property">@temperature</span> = opts.temperature ? <span class="hljs-number">1</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Add a bias term</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@bases</span>.unshift (<span class="hljs-function">-&gt;</span> <span class="hljs-number">1</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Normalize the learning rate</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@rate</span> /= <span class="hljs-property">@bases</span>.length</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Initialize regressors</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@regressors</span> = (<span class="hljs-keyword">new</span> Regressor(<span class="hljs-property">@bases</span>, <span class="hljs-property">@rate</span>) <span class="hljs-keyword">for</span> [<span class="hljs-number">0.</span>..<span class="hljs-property">@actions</span>])</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <h2 id="estimate">estimate</h2>
+<p>Get linear regression prediction for reward
+for given state and action</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">estimate</span>: <span class="hljs-function"><span class="hljs-params">(state, action)</span> -&gt;</span> <span class="hljs-property">@regressors</span>[action].estimate(state)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <h2 id="max">max</h2>
+<p>Get best action and associated predicted reward from given state</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">max</span>: <span class="hljs-function"><span class="hljs-params">(state)</span> -&gt;</span>
+    best = <span class="hljs-literal">null</span>; max = -Infinity
+    <span class="hljs-keyword">for</span> action <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-property">@actions</span>]
+      estimate = <span class="hljs-property">@estimate</span> state, action</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Update <code>best</code> and <code>max</code> if we are better than them</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> estimate &gt; max
+        max = estimate; best = [action]
+      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> estimate <span class="hljs-keyword">is</span> max</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>If there are ties, we will choose randomly.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        best.push action</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Choose randomly from among ties</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attribute">action</span>: helper._rand best
+      <span class="hljs-attribute">estimate</span>: max
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <h2 id="softmax">softmax</h2>
+<p>Get a random action, weighted by the expected
+reward of the actions (all made positive with e^x).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">softmax</span>: <span class="hljs-function"><span class="hljs-params">(state)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Compute the exponential weights from the estimated rewards</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    weights = (helper._pow(<span class="hljs-property">@estimate</span>(state, action) / <span class="hljs-property">@temperature</span>) <span class="hljs-keyword">for</span> action <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-property">@actions</span>])</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Get the weighted random action</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    action = helper._weightedRandom weights
+
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attribute">action</span>: action
+      <span class="hljs-attribute">estimate</span>: <span class="hljs-property">@estimate</span> state, action
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <h2 id="epsilongreedy">epsilonGreedy</h2>
+<p>Get best action, except with probability epsilon,
+in which case get random action. This is important
+so the agent keeps exploring and learning.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">epsilonGreedy</span>: <span class="hljs-function"><span class="hljs-params">(state)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>With probability @epsilon, pick a random action</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> Math.random() &lt; <span class="hljs-property">@epsilon</span>
+      <span class="hljs-keyword">return</span> {
+        <span class="hljs-attribute">action</span>: action = helper._rand <span class="hljs-property">@actions</span>
+        <span class="hljs-attribute">estimate</span>: <span class="hljs-property">@estimate</span> state, action
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Otherwise, return true maximum expectation action.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">else</span> <span class="hljs-property">@max</span> state</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <h2 id="forward">forward</h2>
+<p>Return the chosen action based on the strategy in the opts</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">forward</span>: <span class="hljs-function"><span class="hljs-params">(state)</span> -&gt;</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-property">@forwardMode</span> <span class="hljs-keyword">is</span> <span class="hljs-string">'softmax'</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-property">@softmax</span> state
+    <span class="hljs-keyword">else</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-property">@epsilonGreedy</span> state</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <h2 id="backward">backward</h2>
+<p>Update linreg coefficients to learn
+from given action/reward pair.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">backward</span>: <span class="hljs-function"><span class="hljs-params">(state, action, newState, reward)</span> -&gt;</span>
+    <span class="hljs-property">@regressors</span>[action].feed state, reward + <span class="hljs-keyword">if</span> newState? <span class="hljs-keyword">then</span> <span class="hljs-property">@discount</span> * <span class="hljs-property">@forward</span>(newState).estimate <span class="hljs-keyword">else</span> <span class="hljs-number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <h2 id="serialize">serialize</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">serialize</span>: <span class="hljs-function">-&gt;</span> {
+    <span class="hljs-attribute">regressors</span>: (regressor.serialize() <span class="hljs-keyword">for</span> regressor <span class="hljs-keyword">in</span> <span class="hljs-property">@regressors</span>)
+    <span class="hljs-attribute">opts</span>: <span class="hljs-property">@opts</span>
+  }</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

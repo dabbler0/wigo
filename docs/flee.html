@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>#</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="2048.html">
+                2048.coffee
+              </a>
+            
+              
+              <a class="source" href="blackjack.html">
+                blackjack.coffee
+              </a>
+            
+              
+              <a class="source" href="chase.html">
+                chase.coffee
+              </a>
+            
+              
+              <a class="source" href="chased.html">
+                chased.coffee
+              </a>
+            
+              
+              <a class="source" href="dumbGame.html">
+                dumbGame.coffee
+              </a>
+            
+              
+              <a class="source" href="flee.html">
+                flee.coffee
+              </a>
+            
+              
+              <a class="source" href="grid.html">
+                grid.coffee
+              </a>
+            
+              
+              <a class="source" href="path.html">
+                path.coffee
+              </a>
+            
+              
+              <a class="source" href="snake.html">
+                snake.coffee
+              </a>
+            
+              
+              <a class="source" href="ticTacToe.html">
+                ticTacToe.coffee
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h1 id="-">#</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>WIGO Flee Game
+Copyright (c) <span class="hljs-number">2014</span> Anthony Bau, Weihang Fan, Calvin Luo, <span class="hljs-keyword">and</span> Steven Price
+MIT License.</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h1 id="-">#</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>{Game} = <span class="hljs-built_in">require</span> <span class="hljs-string">'../game.coffee'</span>
+helper = <span class="hljs-built_in">require</span> <span class="hljs-string">'../helper.coffee'</span>
+
+PRIZE_SPAWN_PROBABILITY = <span class="hljs-number">0.05</span>
+WALL_DENSITY = <span class="hljs-number">0.2</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <h1 id="fleegame">FleeGame</h1>
+<p>A more complex game. The agent must avoid a randomly-moving enemy.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.FleeGame = <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FleeGame</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Game</span></span>
+  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(<span class="hljs-property">@w</span> = <span class="hljs-number">5</span>, <span class="hljs-property">@h</span> = <span class="hljs-number">5</span>)</span> -&gt;</span>
+    <span class="hljs-keyword">super</span> <span class="hljs-property">@w</span> * <span class="hljs-property">@h</span>, <span class="hljs-number">4</span>, <span class="hljs-number">2</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Place the enemy in the upper-right corner</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@state</span>.layers[<span class="hljs-number">1</span>][<span class="hljs-property">@w</span> - <span class="hljs-number">1</span>] = <span class="hljs-number">1</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Place player in the upper-left corner</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@state</span>.layers[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>] = <span class="hljs-number">1</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <h3 id="coordinate-index-conversion">Coordinate/index conversion</h3>
+<p>Convert between the indices in the state layers
+and (x, y) coordinates</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">_coord</span>: <span class="hljs-function"><span class="hljs-params">(index)</span> -&gt;</span> {<span class="hljs-attribute">x</span>: index % <span class="hljs-property">@w</span>, <span class="hljs-attribute">y</span>: (index - (index % <span class="hljs-property">@w</span>)) / <span class="hljs-property">@w</span>}
+  <span class="hljs-attribute">_index</span>: <span class="hljs-function"><span class="hljs-params">(coord)</span> -&gt;</span> coord.x + coord.y * <span class="hljs-property">@w</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <h3 id="corners">corners</h3>
+<p>Utility function to get the state indices
+of the corners of the board</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">_corners</span>: <span class="hljs-function">-&gt;</span> [
+      <span class="hljs-property">@_index</span> {<span class="hljs-attribute">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attribute">y</span>: <span class="hljs-number">0</span>}
+      <span class="hljs-property">@_index</span> {<span class="hljs-attribute">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attribute">y</span>: <span class="hljs-property">@h</span> - <span class="hljs-number">1</span>}
+      <span class="hljs-property">@_index</span> {<span class="hljs-attribute">x</span>: <span class="hljs-property">@w</span> - <span class="hljs-number">1</span>, <span class="hljs-attribute">y</span>: <span class="hljs-number">0</span>}
+      <span class="hljs-property">@_index</span> {<span class="hljs-attribute">x</span>: <span class="hljs-property">@w</span> - <span class="hljs-number">1</span>, <span class="hljs-attribute">y</span>: <span class="hljs-property">@h</span> - <span class="hljs-number">1</span>}
+    ]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <h2 id="dirs">dirs</h2>
+<p>The four cardinal directions.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  _dirs = [
+    {<span class="hljs-attribute">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attribute">y</span>: <span class="hljs-number">1</span>},
+    {<span class="hljs-attribute">x</span>: <span class="hljs-number">1</span>, <span class="hljs-attribute">y</span>: <span class="hljs-number">0</span>},
+    {<span class="hljs-attribute">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attribute">y</span>: -<span class="hljs-number">1</span>},
+    {<span class="hljs-attribute">x</span>: -<span class="hljs-number">1</span>, <span class="hljs-attribute">y</span>: <span class="hljs-number">0</span>}
+  ]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <h2 id="getrandposition">getRandPosition</h2>
+<p>Given a position, get a random legal position
+that is orthogonally adjacent to it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">getRandPosition</span>: <span class="hljs-function"><span class="hljs-params">(pos)</span> -&gt;</span>
+    possibilities = []</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Try out all four cardinal directions</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">for</span> dir <span class="hljs-keyword">in</span> _dirs
+      newPos = {<span class="hljs-attribute">x</span>: pos.x + dir.x, <span class="hljs-attribute">y</span>: pos.y + dir.y}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Check if the resultant square is valid;
+if so, add it to our list of valid adjacent
+squares.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> <span class="hljs-number">0</span> &lt;= newPos.x &lt; <span class="hljs-property">@w</span> <span class="hljs-keyword">and</span>
+         <span class="hljs-number">0</span> &lt;= newPos.y &lt; <span class="hljs-property">@h</span> <span class="hljs-keyword">and</span>
+         <span class="hljs-property">@state</span>.layers[<span class="hljs-number">1</span>][<span class="hljs-property">@_index</span> newPos] <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
+        possibilities.push newPos</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>If there is no valid adjacent square,
+say not to move</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> possibilities.length <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
+      <span class="hljs-keyword">return</span> pos</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Otherwise, return a random valid adjacent square.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">else</span>
+      <span class="hljs-keyword">return</span> helper._rand possibilities</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <h2 id="advance">advance</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">advance</span>: <span class="hljs-function"><span class="hljs-params">(action)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Get the wanted direction of motion</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    dir = _dirs[action]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Get the current player coordinate</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    coord = <span class="hljs-literal">null</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-property">@w</span> * <span class="hljs-property">@h</span>]
+      <span class="hljs-keyword">if</span> <span class="hljs-property">@state</span>.layers[<span class="hljs-number">0</span>][i] <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
+        coord = <span class="hljs-property">@_coord</span> i
+        <span class="hljs-keyword">break</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Get the current prize coordinate</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    prizeCoords = []
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-property">@w</span> * <span class="hljs-property">@h</span>]
+      <span class="hljs-keyword">if</span> <span class="hljs-property">@state</span>.layers[<span class="hljs-number">1</span>][i] <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
+        prizeCoords.push <span class="hljs-property">@_coord</span> i</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Find new coordinate</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    newCoord = {<span class="hljs-attribute">x</span>: coord.x + dir.x, <span class="hljs-attribute">y</span>: coord.y + dir.y}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Move the enemy</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">for</span> prizeCoord <span class="hljs-keyword">in</span> prizeCoords
+      <span class="hljs-property">@state</span>.layers[<span class="hljs-number">1</span>][<span class="hljs-property">@_index</span>(prizeCoord)] = <span class="hljs-number">0</span>
+      <span class="hljs-property">@state</span>.layers[<span class="hljs-number">1</span>][<span class="hljs-property">@_index</span>(<span class="hljs-property">@getRandPosition</span>(prizeCoord))] = <span class="hljs-number">1</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>If the new coordinate is a wall or out-of-bounds, return</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> (<span class="hljs-number">0</span> &lt;= newCoord.x &lt; <span class="hljs-property">@w</span>) <span class="hljs-keyword">or</span>
+       <span class="hljs-keyword">not</span> (<span class="hljs-number">0</span> &lt;= newCoord.y &lt; <span class="hljs-property">@h</span>)
+      <span class="hljs-keyword">return</span> {<span class="hljs-attribute">reward</span>: -<span class="hljs-number">1</span>, <span class="hljs-attribute">turn</span>: <span class="hljs-number">0</span>}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Move the player</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@state</span>.layers[<span class="hljs-number">0</span>][<span class="hljs-property">@_index</span>(coord)] = <span class="hljs-number">0</span>
+    <span class="hljs-property">@state</span>.layers[<span class="hljs-number">0</span>][<span class="hljs-property">@_index</span>(newCoord)] = <span class="hljs-number">1</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>If the enemy is touching them, penalize the player</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> <span class="hljs-property">@state</span>.layers[<span class="hljs-number">1</span>][<span class="hljs-property">@_index</span>(newCoord)] <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
+      <span class="hljs-keyword">return</span> {<span class="hljs-attribute">reward</span>: -<span class="hljs-number">1</span>, <span class="hljs-attribute">turn</span>: <span class="hljs-number">0</span>}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Otherwise ok</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">else</span>
+      <span class="hljs-keyword">return</span> {<span class="hljs-attribute">reward</span>: <span class="hljs-number">0</span>, <span class="hljs-attribute">turn</span>: <span class="hljs-number">0</span>}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <h2 id="render">render</h2>
+<p>Same as grid render, but with ‘X’ for enemy and no prizes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">render</span>: <span class="hljs-function">-&gt;</span>
+    str = <span class="hljs-string">''</span>
+    <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-property">@h</span>]
+      <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-property">@w</span>]
+        <span class="hljs-keyword">if</span> <span class="hljs-property">@state</span>.layers[<span class="hljs-number">0</span>][j * <span class="hljs-property">@w</span> + i] <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
+          str += <span class="hljs-string">'@'</span>
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> <span class="hljs-property">@state</span>.layers[<span class="hljs-number">1</span>][j * <span class="hljs-property">@w</span> + i] <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
+          str += <span class="hljs-string">'X'</span>
+        <span class="hljs-keyword">else</span>
+          str += <span class="hljs-string">' '</span>
+      str += <span class="hljs-string">'\n'</span>
+    <span class="hljs-keyword">return</span> str</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <h2 id="rendercanvas">renderCanvas</h2>
+<p>Same as grid render, but with walls as objects
+and no prizes.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">renderCanvas</span>: <span class="hljs-function"><span class="hljs-params">(ctx, canvas)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>Get scaling factor to fit canvas</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    fx = canvas.width / <span class="hljs-property">@w</span>
+    fy = canvas.height / <span class="hljs-property">@h</span>
+
+    <span class="hljs-keyword">for</span> y <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-property">@h</span>]
+      <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-property">@w</span>]
+        cx = x * fx
+        cy = y * fy
+
+        i = y * <span class="hljs-property">@w</span> + x</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Draw underlying terrain</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        ctx.fillStyle = <span class="hljs-string">'#FFF'</span>
+        ctx.fillRect cx, cy, fx, fy</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>Draw the player, if they are here</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> <span class="hljs-property">@state</span>.layers[<span class="hljs-number">0</span>][i] <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
+          ctx.fillStyle = <span class="hljs-string">'#000'</span>
+          ctx.fillRect cx + fx / <span class="hljs-number">3</span>, cy + fy / <span class="hljs-number">3</span>, fx / <span class="hljs-number">3</span>, fy / <span class="hljs-number">3</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>Draw the enemy, if they are here.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> <span class="hljs-property">@state</span>.layers[<span class="hljs-number">1</span>][i] <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
+          ctx.fillStyle = <span class="hljs-string">'#F00'</span>
+          ctx.fillRect cx + fx / <span class="hljs-number">3</span>, cy + fy / <span class="hljs-number">3</span>, fx / <span class="hljs-number">3</span>, fy / <span class="hljs-number">3</span></pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

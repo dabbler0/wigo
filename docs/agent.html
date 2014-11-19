@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>#</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="agent.html">
+                agent.coffee
+              </a>
+            
+              
+              <a class="source" href="browser.html">
+                browser.coffee
+              </a>
+            
+              
+              <a class="source" href="game.html">
+                game.coffee
+              </a>
+            
+              
+              <a class="source" href="helper.html">
+                helper.coffee
+              </a>
+            
+              
+              <a class="source" href="play.html">
+                play.coffee
+              </a>
+            
+              
+              <a class="source" href="qLearning.html">
+                qLearning.coffee
+              </a>
+            
+              
+              <a class="source" href="regressor.html">
+                regressor.coffee
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h1 id="-">#</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>WIGO Simple Agent wrapper <span class="hljs-keyword">for</span> Q/SARSA-Learner
+Copyright (c) <span class="hljs-number">2014</span> Anthony Bau, Weihang Fan, Calvin Luo, <span class="hljs-keyword">and</span> Steven Price
+MIT License.</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h1 id="-">#</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+{QLearner} = <span class="hljs-built_in">require</span> <span class="hljs-string">'./qLearning.coffee'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <h1 id="agent">Agent</h1>
+<p>Wrapper class on QLearner that knows how to handle the bureaucracy
+that has to do with Games.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.Agent = <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Agent</span></span>
+  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(<span class="hljs-property">@game</span>, <span class="hljs-property">@bases</span>, opts = {})</span> -&gt;</span>
+    <span class="hljs-property">@learner</span> = <span class="hljs-keyword">new</span> QLearner <span class="hljs-property">@game</span>.actions, <span class="hljs-property">@bases</span>, opts</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <h2 id="act">act</h2>
+<p>Will interact with the game state on its own. Make a move
+and learn from the reward.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">act</span>: <span class="hljs-function">-&gt;</span>
+    oldState = <span class="hljs-property">@game</span>.state.clone()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Get said action and act upon it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    {action, estimate} = <span class="hljs-property">@learner</span>.forward <span class="hljs-property">@game</span>.state
+    {reward, turn, terminated} = <span class="hljs-property">@game</span>.advance action</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Learn from the reward</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@learner</span>.backward oldState, action, (<span class="hljs-keyword">if</span> terminated <span class="hljs-keyword">then</span> <span class="hljs-literal">null</span> <span class="hljs-keyword">else</span> <span class="hljs-property">@game</span>.state), reward
+
+    <span class="hljs-keyword">return</span> reward</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <h2 id="compel">compel</h2>
+<p>Force an agent to do an action and learn from it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">compel</span>: <span class="hljs-function"><span class="hljs-params">(action)</span> -&gt;</span>
+    oldState = <span class="hljs-property">@game</span>.state.clone()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Get said action and act upon it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    {reward, turn} = <span class="hljs-property">@game</span>.advance action</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Learn from the reward</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@learner</span>.backward oldState, action, <span class="hljs-property">@game</span>.state, reward
+
+    <span class="hljs-keyword">return</span> reward
+
+  <span class="hljs-attribute">serialize</span>: <span class="hljs-function">-&gt;</span> <span class="hljs-property">@learner</span>.serialize()</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>#</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="agent.html">
+                agent.coffee
+              </a>
+            
+              
+              <a class="source" href="browser.html">
+                browser.coffee
+              </a>
+            
+              
+              <a class="source" href="game.html">
+                game.coffee
+              </a>
+            
+              
+              <a class="source" href="helper.html">
+                helper.coffee
+              </a>
+            
+              
+              <a class="source" href="play.html">
+                play.coffee
+              </a>
+            
+              
+              <a class="source" href="qLearning.html">
+                qLearning.coffee
+              </a>
+            
+              
+              <a class="source" href="regressor.html">
+                regressor.coffee
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h1 id="-">#</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>WIGO game definition schema
+Copyright (c) <span class="hljs-number">2014</span> Anthony Bau, Weihang Fan, Calvin Luo, <span class="hljs-keyword">and</span> Steven Price
+MIT License.</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h1 id="-">#</h1>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <h1 id="state">State</h1>
+<p>Generic representation of a game state.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.State = <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">State</span></span>
+  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(<span class="hljs-property">@size</span>, nLayers = <span class="hljs-number">1</span>)</span> -&gt;</span>
+    <span class="hljs-property">@layers</span> = (<span class="hljs-keyword">new</span> Uint8Array(<span class="hljs-property">@size</span>) <span class="hljs-keyword">for</span> [<span class="hljs-number">0.</span>..nLayers])</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <h2 id="clone">clone</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">clone</span>: <span class="hljs-function">-&gt;</span>
+    clone = <span class="hljs-keyword">new</span> State <span class="hljs-property">@size</span>, <span class="hljs-property">@layers</span>.length
+    <span class="hljs-keyword">for</span> layer, i <span class="hljs-keyword">in</span> <span class="hljs-property">@layers</span>
+      <span class="hljs-keyword">for</span> bit, j <span class="hljs-keyword">in</span> layer
+        clone.layers[i][j] = bit
+    <span class="hljs-keyword">return</span> clone</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <h2 id="eachbit">eachBit</h2>
+<p>Iterate over all the possible i, j coordinates
+and call fn on each</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">eachBit</span>: <span class="hljs-function"><span class="hljs-params">(fn)</span> -&gt;</span>
+    <span class="hljs-keyword">for</span> layer, i <span class="hljs-keyword">in</span> <span class="hljs-property">@layers</span>
+      <span class="hljs-keyword">for</span> bit, j <span class="hljs-keyword">in</span> layer
+        fn i, j</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <h2 id="combinators">combinators</h2>
+<p>Get all possible sets of coordinates of size (degree)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">combinators</span>: <span class="hljs-function"><span class="hljs-params">(degree)</span> -&gt;</span>
+    <span class="hljs-keyword">if</span> degree &gt; <span class="hljs-number">1</span>
+      subcombinators = <span class="hljs-property">@combinators</span> degree - <span class="hljs-number">1</span>
+    <span class="hljs-keyword">else</span>
+      subcombinators = [[]]
+
+    combinators = []
+
+    <span class="hljs-property">@eachBit</span> (i, j) =&gt;
+      <span class="hljs-keyword">for</span> combinator <span class="hljs-keyword">in</span> subcombinators
+        combinators.push combinator.concat [[i, j]]
+
+    <span class="hljs-keyword">return</span> combinators</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <h2 id="andcombinators">andCombinators</h2>
+<p>Return a set of functions that (and) all of the bits
+at all possible sets of coordinates of size (degree)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">andCombinators</span>: <span class="hljs-function"><span class="hljs-params">(degree)</span> -&gt;</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-property">@combinators</span>(degree).map (combination) =&gt;
+      <span class="hljs-keyword">return</span> (state) =&gt;
+        <span class="hljs-keyword">for</span> coordinate <span class="hljs-keyword">in</span> combination
+          <span class="hljs-keyword">if</span> state.layers[coordinate[<span class="hljs-number">0</span>]][coordinate[<span class="hljs-number">1</span>]] <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <h2 id="orcombinators">orCombinators</h2>
+<p>The “or” analogue to andCombinators</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">orCombinators</span>: <span class="hljs-function"><span class="hljs-params">(degree)</span> -&gt;</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-property">@combinators</span>(degree).map (combination) =&gt;
+      <span class="hljs-keyword">return</span> (state) =&gt;
+        <span class="hljs-keyword">for</span> coordinate <span class="hljs-keyword">in</span> combination
+          <span class="hljs-keyword">if</span> state.layers[coordinate[<span class="hljs-number">0</span>]][coordinate[<span class="hljs-number">1</span>]] <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <h1 id="game">Game</h1>
+<p>A single game, including a persistent state.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.Game = <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Game</span></span>
+  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(<span class="hljs-property">@size</span>, <span class="hljs-property">@actions</span>, <span class="hljs-property">@nLayers</span> = <span class="hljs-number">1</span>, <span class="hljs-property">@players</span> = <span class="hljs-number">1</span>)</span> -&gt;</span>
+    <span class="hljs-property">@state</span> = <span class="hljs-keyword">new</span> State <span class="hljs-property">@size</span>, <span class="hljs-property">@nLayers</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <h2 id="advance">advance</h2>
+<p>Should mutate @state and return object with reward and the turn.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">advance</span>: <span class="hljs-function"><span class="hljs-params">(action)</span> -&gt;</span> {<span class="hljs-attribute">reward</span>: <span class="hljs-number">0</span>, <span class="hljs-attribute">turn</span>: <span class="hljs-number">0</span>}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <h2 id="render">render</h2>
+<p>Return a logging string graphically representing the string.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">render</span>: <span class="hljs-function">-&gt;</span> <span class="hljs-string">''</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <h2 id="rendercanvas">renderCanvas</h2>
+<p>Render onto an HTML5 canvas.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">renderCanvas</span>: <span class="hljs-function"><span class="hljs-params">(canvas, ctx)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

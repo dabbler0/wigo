@@ -118,11 +118,12 @@
 
   games = {
     'grid': wigo.GridGame,
-    'path': wigo.PathGame,
     'chase': wigo.ChaseGame,
+    'chased': wigo.ChasedGame,
     'flee': wigo.FleeGame,
     'blackjack': wigo.Blackjack,
-    'snake': wigo.SnakeGame
+    'snake': wigo.SnakeGame,
+    '2048': wigo.GameNot
   };
 
   getGame = function() {
