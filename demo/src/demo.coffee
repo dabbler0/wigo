@@ -93,6 +93,7 @@ getGame = -> games[gameSelector.value]
 kill = ->
 document.querySelector('#apply').addEventListener 'click', ->
   kill()
+  rolling.history = []; rolling.min = rolling.max = 0
   kill = playGame getGame(), getOptions()
 
 document.querySelector('#export-history').addEventListener 'click', ->
@@ -114,7 +115,7 @@ combinators = [
   (game) -> game.state.andCombinators(2)
 ]
 
-combinator = combinators[0]
+combinator = combinators[1]
 
 document.querySelector('#bases').addEventListener 'change', ->
   if @value is 'strict-linear'
@@ -127,7 +128,7 @@ document.querySelector('#bases').addEventListener 'change', ->
 playGame = (Game, options) ->
   game = new Game 5, 5
   agent = new wigo.Agent game, combinator(game), options
-  killed = false
+  killed = false; timeout = null
 
   score = 0
   move = ->
@@ -139,7 +140,7 @@ playGame = (Game, options) ->
       game.renderCanvas ctx, canvas
     scoreReport.innerText = scoreReport.textContent = score
     unless killed
-      setTimeout move, speed
+      timeout = setTimeout move, speed
 
   move()
-  return -> killed = true
+  return -> killed = true: clearTimeout timeout

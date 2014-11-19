@@ -1,3 +1,12 @@
+<!--
+Notes to CSC490:
+tl;dr To read the README, go here instead: https://github.com/dabbler0/wigo
+
+This document is written in Github-Flavored Markdown. It is human-readable as is, and you can read it, but it's really much more pleasant (especially because of tables and syntax highlighting) to see this compiled as gfm and using the gfm stylesheets. So go online.
+
+Also, be aware that we're still changing the live demo source on https://dabbler0.github.io/wigo. The demo online may differ from what is described here. The README at https://github.com/dabbler0/wigo will always reflect the actual demo.
+-->
+
 Well-Informed Game Operator
 ===========================
 

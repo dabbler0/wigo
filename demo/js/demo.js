@@ -134,6 +134,8 @@
 
   document.querySelector('#apply').addEventListener('click', function() {
     kill();
+    rolling.history = [];
+    rolling.min = rolling.max = 0;
     return kill = playGame(getGame(), getOptions());
   });
 
@@ -165,7 +167,7 @@
     }
   ];
 
-  combinator = combinators[0];
+  combinator = combinators[1];
 
   document.querySelector('#bases').addEventListener('change', function() {
     if (this.value === 'strict-linear') {
@@ -176,10 +178,11 @@
   });
 
   playGame = function(Game, options) {
-    var game, killed, move, score;
+    var game, killed, move, score, timeout;
     game = new Game(5, 5);
     agent = new wigo.Agent(game, combinator(game), options);
     killed = false;
+    timeout = null;
     score = 0;
     move = function() {
       score += agent.act();
@@ -192,12 +195,14 @@
       }
       scoreReport.innerText = scoreReport.textContent = score;
       if (!killed) {
-        return setTimeout(move, speed);
+        return timeout = setTimeout(move, speed);
       }
     };
     move();
     return function() {
-      return killed = true;
+      return killed = {
+        "true": clearTimeout(timeout)
+      };
     };
   };
 

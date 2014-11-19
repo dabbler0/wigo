@@ -11,6 +11,7 @@
       }
       canvas {
         width: 100%;
+        border: 1px solid black;
       }
     </style>
   </head>
@@ -29,10 +30,12 @@
         </center>
       </div>
       <div class="col-md-4">
-        <div id="score"></div>
-        <center>
-          <canvas id="graph"></canvas><br/>
-        </center>
+        <div style="position:relative">
+          <div id="score" style="position:absolute;"></div>
+          <center>
+            <canvas id="graph"></canvas><br/>
+          </center>
+        </div>
       </div>
       <div class="col-md-4">
         <div>
@@ -53,8 +56,8 @@
           <div class="input-group">
             <span class="input-group-addon">Choose Game</span>
             <select id="game"class="form-control">
-              <option value="grid">Treasure Hunt</option>
               <option value="blackjack">Blackjack</option>
+              <option value="grid">Treasure Hunt</option>
               <option value="chase">Chase</option>
               <option value="chased">Chased</option>
               <option value="flee">Flee</option>
@@ -68,8 +71,8 @@
           <div class="input-group">
             <span class="input-group-addon">Bases</span>
             <select id="bases" class="form-control">
-              <option value="strict-linear">Simple linear</option>
               <option value="degree-2">Degree 2 "and" combinations</option>
+              <option value="strict-linear">Simple linear</option>
             </select>
           </div>
           <div class="input-group">
@@ -96,13 +99,13 @@
           <div id="softmax-options">
             <div class="input-group">
               <span class="input-group-addon">Temperature</span>
-              <input id="softmax-temperature" class="form-control" value="1"/>
+              <input id="softmax-temperature" class="form-control" value="0.1"/>
             </div>
           </div>
         </div>
         <button id="apply" class="btn btn-large btn-primary">Start Game</button>
-        <button id="export-history" class="btn btn-large btn-primary">Export Score History</button>
-        <button id="export-params" class="btn btn-large btn-primary">Export Agent Data</button>
+        <button id="export-history" class="btn btn-large btn-default">Export Score History</button>
+        <button id="export-params" class="btn btn-large btn-default">Export Agent Data</button>
         </div>
     </div>
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
