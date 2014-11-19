@@ -22,8 +22,8 @@ Game                 |Notes
 Treasure Hunt        | A simple game, but with a large set of inputs. The agent is in a 5x5 grid with some walls and a prize that rotates around the four corners, and must learn to get the prize and avoid the walls.
 Simplified Blackjack | Another simple game. Standard 52-card deck. Each turn, the agent can choose to either hit or stay, as in blackjack; if it goes over 21, it loses. If it stays under 21, the dealer is assigned a uniformly random sum between 10 and 21, and if the agent beats the dealer, it wins.
 Chase                | The agent is on a 5x5 grid, and must chase a moving prize. However, the prize always respawns at the same point -- ideally (and in most cases), the agent learns to sit on the spawn point and get lots of points.
-Flee                 | There is one moving enemy, and the agent must learn to avoid it. *This is a complex game, and training can take over half an hour*. However, the agent does learn to avoid pretty well.
-Snake                | The classic arcade game of Snake; the agent must try to make the longest non-self-intersecting snake possible, while avoiding some random walls. *This is a complex game, and training can take over an hour*. However, the agent can also learn to win this.
+Flee                 | There is one moving enemy, and the agent must learn to avoid it. **This is a complex game, and training can take over half an hour**. However, the agent does learn to avoid pretty well.
+Snake                | The classic arcade game of Snake; the agent must try to make the longest non-self-intersecting snake possible, while avoiding some random walls. **This is a complex game, and training can take over an hour**. However, the agent can also learn to win this.
 2048                 | The popular online numbers game. It's unclear if SARSA learning can successfully solve this game.
 
 At first, the score graph will go down quickly (since most of these games are designed to be lost by a random player). If the agent learns successfully, you will see the graph level out, and, in games where it is possible to win, it will start to rise again.
@@ -58,7 +58,7 @@ bases[0](state) * thetas[0] + bases[1](state) * thetas[1] ...
 ```
 
 Some simple basis function generatirs that are provided in the WIGO package:
-```
+```coffeescript
 game.state.andCombinators(n) # Return a set of basis functions that are every possible set of `n` bits,
                              # "and"ed together. Returns (|state| choose n) functions.
 game.state.orCombinators(n) # The "or" analogue of `andCombinators`.
