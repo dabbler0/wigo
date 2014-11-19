@@ -117,6 +117,7 @@ class MyGame extends wigo.Game
 ```
 
 ### Serializing Agent Data
+You can dump your agent data to a dead JavaScript object by calling `agent.serialize()`; the `QLearner` and `Regressor` classes have analagous methods. **Make sure you remember your basis functions, because those can't be serialized.** There isn't currently away to load them back again from serialized form, but aside from basis functions there is enough information in the serialization to reconstruct the entire agent.
 
 Contributing
 ============
@@ -165,6 +166,9 @@ Todo and Unfinished Experiments
 
 ### Todo: True multiplayer games
   Right now all the games adversarial-ness is hard-coded in the game itself. There exists handles for turn changing in the game, because multiplayer was originally going to be supported by the WIGO environment; this should be implemented sometime. This would allow us to do experiments with self-play.
+
+### Todo: Serializable basis functions
+  Try requiring all basis functions to be serializable as dead JavaScript? Or even invent a mini-language for basis functions. This will allow us to have a more intuitive serialization/deserialization scheme.
 
 ### Experiment: Supervised vs. Unsupervised Training
   There is already a `compel` handle in the Agent class right now that allows supervised training. Try writing known-good AIs for games and training SARSA learning by compulsion, and seeing if it works better than SARSA learning by self-feedback.
