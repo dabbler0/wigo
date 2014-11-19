@@ -84,7 +84,7 @@ exports.Chased = class Chased extends Game
     if chaser
       return {reward: -10, turn: 0}
     else
-      return {reward: 0, turn: 0}
+      return {reward: 1, turn: 0}
 
   render: ->
     str = ''
