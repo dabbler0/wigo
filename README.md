@@ -115,3 +115,71 @@ class MyGame extends wigo.Game
                         # so here this will always be false.
     }
 ```
+
+### Serializing Agent Data
+You can dump your agent data to a dead JavaScript object by calling `agent.serialize()`; the `QLearner` and `Regressor` classes have analagous methods. **Make sure you remember your basis functions, because those can't be serialized.** There isn't currently away to load them back again from serialized form, but aside from basis functions there is enough information in the serialization to reconstruct the entire agent.
+
+Contributing
+============
+
+WIGO is built with `bower`, `gulp`, and `browserify`.
+
+Clone the repo. Get `node` and `npm`. Get gulp and bower:
+```
+npm install -g gulp
+npm install -g bower
+```
+
+Get dependencies for the repo:
+```
+npm install
+bower install
+```
+
+Then, to build:
+```
+gulp
+```
+
+There are two subtasks, `gulp browser` and `gulp demo`, to build WIGO core and to build the demo, respectively.
+
+Directory Structure
+-------------------
+```
+./
+  ./src
+    ./src/games
+      # All the subclasses of Game
+    # Core WIGO source files: gradient descent, Q/SARSA learning
+  ./build
+    ./demo/browser.js # The distribution file
+  ./demo
+    ./demo/src
+      ./demo/src/demo.coffee # demo coffeescript
+    ./demo/js
+      ./demo/js/demo.js # built demo js; don't edit this by hand
+    ./demo/index.html # the demo
+```
+
+Todo and Unfinished Experiments
+-------------------------------
+
+### Todo: True multiplayer games
+  Right now all the games adversarial-ness is hard-coded in the game itself. There exists handles for turn changing in the game, because multiplayer was originally going to be supported by the WIGO environment; this should be implemented sometime. This would allow us to do experiments with self-play.
+
+### Todo: Serializable basis functions
+  Try requiring all basis functions to be serializable as dead JavaScript? Or even invent a mini-language for basis functions. This will allow us to have a more intuitive serialization/deserialization scheme.
+
+### Experiment: Supervised vs. Unsupervised Training
+  There is already a `compel` handle in the Agent class right now that allows supervised training. Try writing known-good AIs for games and training SARSA learning by compulsion, and seeing if it works better than SARSA learning by self-feedback.
+
+### Experiment: Random/Genetic Basis Generation
+  Cull any bases whose thetas are too close to zero, and randomly introduce new bases, to try to get a better basis pool than could be developed by hand. See the `random-regressors` branch for a prototype of this.
+
+### Experiment: Internal State
+  Try providing randomly-initialized "extra state" passed along each iteration, trained alongisde the action Q function (like estimation-maximization), and see if it helps with any games (2048 especially). Currently, the trained agent is stateless; this would change that, possibly for the better?
+
+### More Fun Games To Implement
+  - Battleship (agent should learn to shoot close to previous shot if it hit)
+  - A simple platformer
+

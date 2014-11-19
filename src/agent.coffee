@@ -42,8 +42,3 @@ exports.Agent = class Agent
     return reward
 
   serialize: -> @learner.serialize()
-
-Agent.fromSerialization = (game, bases, serialized) ->
-  agent = new Agent game, bases
-  agent.learner = QLearner.fromSerialization serialized
-  return agent
