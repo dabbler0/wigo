@@ -13,7 +13,9 @@ exports.Regressor = class Regressor
 
   # ## estimate
   # Get the predicted output for the given input using
-  # basis functions and current thetas
+  # basis functions and current thetas.
+  #
+  # Returns sum(theta[i] * basis[i]).
   estimate: (input) ->
     output = 0
     for basis, i in @bases
@@ -24,17 +26,16 @@ exports.Regressor = class Regressor
   # Given an input/output map, do another gradient descent iteration to improve
   # thetas.
   feed: (input, output) ->
+    # Get the gradient (error term)
     gradient = @estimate(input) - output
     for basis, i in @bases
+      # Apply gradient descent formula. `@lambda` is the regularization term, and penalizes
+      # high coefficients to avoid overfitting.
       @thetas[i] -= @rate * (gradient + @lambda * @thetas[i] / @thetas.length) * basis(input)
 
+  # ## serialize
   serialize: -> {
     thetas: @thetas
     rate: @rate
     lambda: @lambda
   }
-
-Regressor.fromSerialized = (bases, serialized) ->
-  k = new Regressor bases, serialized.rate, serialized.lambda
-  k.thetas = serialized.thetas
-  return k
