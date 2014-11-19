@@ -11,6 +11,7 @@ helper = require './helper.coffee'
 # Linear combination regresssion Q-learning agent
 exports.QLearner = class QLearner
   constructor: (@actions, @bases, @opts) ->
+    # Fill in option defaults
     opts = @opts
     @rate = opts.rate ? 1
     @discount = opts.discount ? 0.5
@@ -23,9 +24,10 @@ exports.QLearner = class QLearner
     # Add a bias term
     @bases.unshift (-> 1)
 
+    # Normalize the learning rate
     @rate /= @bases.length
 
-    # Init thetas to zero
+    # Initialize regressors
     @regressors = (new Regressor(@bases, @rate) for [0...@actions])
 
   # ## estimate
@@ -39,10 +41,15 @@ exports.QLearner = class QLearner
     best = null; max = -Infinity
     for action in [0...@actions]
       estimate = @estimate state, action
+
+      # Update `best` and `max` if we are better than them
       if estimate > max
         max = estimate; best = [action]
       else if estimate is max
+        # If there are ties, we will choose randomly.
         best.push action
+
+    # Choose randomly from among ties
     return {
       action: helper._rand best
       estimate: max
@@ -52,8 +59,12 @@ exports.QLearner = class QLearner
   # Get a random action, weighted by the expected
   # reward of the actions (all made positive with e^x).
   softmax: (state) ->
+    # Compute the exponential weights from the estimated rewards
     weights = (helper._pow(@estimate(state, action) / @temperature) for action in [0...@actions])
+
+    # Get the weighted random action
     action = helper._weightedRandom weights
+
     return {
       action: action
       estimate: @estimate state, action
@@ -64,11 +75,14 @@ exports.QLearner = class QLearner
   # in which case get random action. This is important
   # so the agent keeps exploring and learning.
   epsilonGreedy: (state) ->
+    # With probability @epsilon, pick a random action
     if Math.random() < @epsilon
       return {
         action: action = helper._rand @actions
         estimate: @estimate state, action
       }
+
+    # Otherwise, return true maximum expectation action.
     else @max state
 
   # ## forward
@@ -79,18 +93,14 @@ exports.QLearner = class QLearner
     else
       return @epsilonGreedy state
 
-  # ## learn
+  # ## backward
   # Update linreg coefficients to learn
   # from given action/reward pair.
   backward: (state, action, newState, reward) ->
     @regressors[action].feed state, reward + if newState? then @discount * @forward(newState).estimate else 0
 
+  # ## serialize
   serialize: -> {
     regressors: (regressor.serialize() for regressor in @regressors)
     opts: @opts
   }
-
-QLearner.fromSerialized = (action, bases, serialization) ->
-  learner = new QLearner action, bases, serialization.opts
-  learner.regressors[i] = Regressor.fromSerialized(k) for k, i in serialization
-  return learner

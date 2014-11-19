@@ -81,10 +81,11 @@ getOptions = -> {
 gameSelector = document.querySelector '#game'
 games = {
   'grid': wigo.GridGame
-  'path': wigo.PathGame
   'chase': wigo.ChaseGame
+  'chased': wigo.ChasedGame
+  'flee': wigo.FleeGame
   'blackjack': wigo.Blackjack
-  '2048': wigo.NotGame
+  'snake': wigo.SnakeGame
 }
 getGame = -> games[gameSelector.value]
 

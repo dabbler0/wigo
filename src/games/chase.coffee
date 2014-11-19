@@ -1,5 +1,5 @@
 ###
-WIGO Dumb game
+WIGO Chase Game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
 ###
@@ -24,8 +24,15 @@ exports.ChaseGame = class ChaseGame extends Game
     @state.layers[0][0] = 1
     @state.layers[2][@w * @h - 1] = 1
 
+  # ### Coordinate/index conversion
+  # Convert between the indices in the state layers
+  # and (x, y) coordinates
   _coord: (index) -> {x: index % @w, y: (index - (index % @w)) / @w}
   _index: (coord) -> coord.x + coord.y * @w
+
+  # ### corners
+  # Utility function to get the state indices
+  # of the corners of the board
   _corners: -> [
       @_index {x: 0, y: 0}
       @_index {x: 0, y: @h - 1}
@@ -33,6 +40,8 @@ exports.ChaseGame = class ChaseGame extends Game
       @_index {x: @w - 1, y: @h - 1}
     ]
 
+  # ### dirs
+  # The four cardinal directions
   _dirs = {
     0: {x: 0, y: 1}
     1: {x: 1, y: 0}
@@ -40,6 +49,7 @@ exports.ChaseGame = class ChaseGame extends Game
     3: {x: -1, y: 0}
   }
 
+  # ## advance
   advance: (action) ->
     # Get the wanted direction of motion
     dir = _dirs[action]
@@ -93,6 +103,8 @@ exports.ChaseGame = class ChaseGame extends Game
     else
       return {reward: 0, turn: 0}
 
+  # ## render
+  # Same as grid render, but with 'X' for prize.
   render: ->
     str = ''
     for j in [0...@h]
@@ -108,6 +120,8 @@ exports.ChaseGame = class ChaseGame extends Game
       str += '\n'
     return str
 
+  # ## renderCanvas
+  # Same as grid render.
   renderCanvas: (ctx, canvas) ->
     # Get scaling factor
     fx = canvas.width / @w

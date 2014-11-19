@@ -1,5 +1,5 @@
 ###
-WIGO 2048 game
+WIGO 2048 Game
 Copyright (c) 2014 Anthony Bau, Weihang Fan, Calvin Luo, and Steven Price
 MIT License.
 ###

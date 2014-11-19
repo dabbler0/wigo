@@ -1,3 +1,6 @@
+###
+###
+
 helper = require './helper.coffee'
 {Agent} = require './agent.coffee'
 
@@ -9,6 +12,9 @@ module.exports = {
   ChaseGame: require('./games/chase.coffee').ChaseGame
   #Blackjack: require('./games/blackjack.coffee').Blackjack
   NotGame: require('./games/2048.coffee').NotGame
+  ChasedGame: require('./games/chase.coffee').ChasedGame
+  FleeGame: require('./games/flee.coffee').FleeGame
+  SnakeGame: require('./games/snake.coffee').SnakeGame
 
   # Agent class
   Agent: Agent
