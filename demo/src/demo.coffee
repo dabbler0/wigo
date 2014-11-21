@@ -42,11 +42,11 @@ rolling = new RollingGraph scoreCanvas, 1000
 
 ctx = canvas.getContext '2d'
 
-speed = 100
+speed = 10
 speedInput = document.querySelector '#speed'
 speedInput.addEventListener 'input', ->
   value = Number @value
-  speed = 100 /  Math.log value + 1
+  speed = 1000 /  value
 
 softmaxOptions = document.querySelector '#softmax-options'
 epsilonOptions = document.querySelector '#epsilon-options'

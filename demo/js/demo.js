@@ -64,14 +64,14 @@
 
   ctx = canvas.getContext('2d');
 
-  speed = 100;
+  speed = 10;
 
   speedInput = document.querySelector('#speed');
 
   speedInput.addEventListener('input', function() {
     var value;
     value = Number(this.value);
-    return speed = 100 / Math.log(value + 1);
+    return speed = 1000 / value;
   });
 
   softmaxOptions = document.querySelector('#softmax-options');
